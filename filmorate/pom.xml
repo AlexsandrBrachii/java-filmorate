@@ -49,6 +49,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<defaultGoal>clean</defaultGoal>
 	</build>
 
 </project>
