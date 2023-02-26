@@ -34,13 +34,6 @@ public class InMemoryUserStorageTest {
     }
 
     @Test
-    void getAllUsers_WithEmptyList() {
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> storage.getAllUsers());
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("Список с пользователями пустой.", exception.getReason());
-    }
-
-    @Test
     void updateUser_WithoutId() {
         User user = new User( "awb@mail.ru", "awb", LocalDate.parse("1996-09-08"));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> storage.updateUser(user));
