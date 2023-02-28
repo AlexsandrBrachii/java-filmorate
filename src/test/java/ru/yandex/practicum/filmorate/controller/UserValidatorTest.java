@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.validator;
+package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithEmptyEmail() {
-        User user = new User( "", "awb", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("")
+                .login("awb")
+                .name("alex")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validateUser(user);
@@ -28,7 +34,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithInvalidEmail() {
-        User user = new User( "", "awb.mail.ru", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("awb.mail.ru")
+                .login("awb")
+                .name("alex")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validateUser(user);
@@ -39,7 +51,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithEmptyLogin() {
-        User user = new User("awb@mail.ru", " ", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("awb@mail.ru")
+                .login(" ")
+                .name("alex")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validateUser(user);
@@ -50,7 +68,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithInvalidLogin() {
-        User user = new User("awb@mail.ru", "awb b", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("awb@mail.ru")
+                .login("awb b")
+                .name("alex")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validateUser(user);
@@ -61,7 +85,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithEmptyName() {
-        User user = new User("awb@mail.ru", "awb", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("awb@mail.ru")
+                .login("awb")
+                .name("")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         validateUser(user);
 
@@ -70,7 +100,13 @@ public class UserValidatorTest {
 
     @Test
     public void validateUser_WithInvalidBirthday() {
-        User user = new User("awb@mail.ru", "awb", LocalDate.parse("2100-09-08"));
+        User user = User.builder()
+                .id(1)
+                .email("awb@mail.ru")
+                .login("awb")
+                .name("")
+                .birthday(LocalDate.parse("2100-09-08"))
+                .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             validateUser(user);
