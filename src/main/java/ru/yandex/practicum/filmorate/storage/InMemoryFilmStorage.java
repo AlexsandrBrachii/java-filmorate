@@ -1,16 +1,14 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
 
-import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
+
 
 @Slf4j
 @Component
@@ -28,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             return films.get(id);
         } else {
             log.info("film с id=" + id + " не найден.");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "film с id=" + id + " не найден.");
+            throw new NotFoundException("film с id=" + id + " не найден.");
         }
     }
 
@@ -42,7 +40,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        validateFilm(film);
         film.setId(identifier);
         films.put(identifier, film);
         identifier++;
@@ -54,9 +51,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
             log.info("film " + film.getName() + " не найден.");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "film " + film.getName() + " не найден.");
+            throw new NotFoundException("film " + film.getName() + " не найден.");
         }
-        validateFilm(film);
         films.put(film.getId(), film);
         log.info("film " + film.getName() + " обновлён.");
         return film;

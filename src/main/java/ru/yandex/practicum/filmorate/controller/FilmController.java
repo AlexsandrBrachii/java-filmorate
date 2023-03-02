@@ -1,40 +1,35 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
 
 import java.util.Collection;
 
+import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
 
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
 
-    private final FilmStorage filmStorage;
+
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
-        this.filmService = filmService;
-    }
-
 
 
     @GetMapping
     private Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
     @GetMapping(value = "/{id}")
     private Film getFilm(@PathVariable int id) {
-        return filmStorage.getFilm(id);
+        return filmService.getFilm(id);
     }
 
     @GetMapping(value = "/popular")
@@ -44,12 +39,14 @@ public class FilmController {
 
     @PostMapping
     private Film addFilm(@RequestBody Film film) {
-        return filmStorage.addFilm(film);
+        validateFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     private Film updateFilm(@RequestBody Film film) {
-        return filmStorage.updateFilm(film);
+        validateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping(value = "/{id}/like/{userId}")
@@ -61,6 +58,7 @@ public class FilmController {
     private void deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLike(id, userId);
     }
+
 
 
 }

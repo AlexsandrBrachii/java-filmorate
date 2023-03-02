@@ -3,8 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -28,10 +27,9 @@ public class UserServiceTest {
         int userId = 0;
         int filmId = -1;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.addFriend(userId, filmId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.addFriend(userId, filmId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("id пользователей не может быть отрицательным.", exception.getReason());
+        assertEquals("user с id=" + userId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -42,10 +40,9 @@ public class UserServiceTest {
         storage.createUser(friend);
         int wrongUserId = 55;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.addFriend(wrongUserId, friend.getId()));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.addFriend(wrongUserId, friend.getId()));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("user с id=" + wrongUserId + " не найден.", exception.getReason());
+        assertEquals("user с id=" + wrongUserId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -56,10 +53,9 @@ public class UserServiceTest {
         storage.createUser(friend);
         int wrongFriendId = 55;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.addFriend(user.getId(), wrongFriendId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.addFriend(user.getId(), wrongFriendId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("friend с id=" + wrongFriendId + " не найден.", exception.getReason());
+        assertEquals("user с id=" + wrongFriendId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -67,10 +63,9 @@ public class UserServiceTest {
         int userId = 0;
         int filmId = -1;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteFriend(userId, filmId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.deleteFriend(userId, filmId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("id не может быть отрицательным.", exception.getReason());
+        assertEquals("user с id=" + userId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -81,10 +76,9 @@ public class UserServiceTest {
         storage.createUser(friend);
         int wrongUserId = 55;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteFriend(wrongUserId, friend.getId()));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.deleteFriend(wrongUserId, friend.getId()));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("user с id=" + wrongUserId + " не найден.", exception.getReason());
+        assertEquals("user с id=" + wrongUserId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -95,20 +89,18 @@ public class UserServiceTest {
         storage.createUser(friend);
         int wrongFriendId = 55;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteFriend(user.getId(), wrongFriendId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.deleteFriend(user.getId(), wrongFriendId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("friend с id=" + wrongFriendId + " не найден.", exception.getReason());
+        assertEquals("user с id=" + wrongFriendId + " не найден.", exception.getMessage());
     }
 
     @Test
     void getFriends_WithNegativeId() {
         int userId = -1;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getFriends(userId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.getFriends(userId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("id не может быть отрицательным.", exception.getReason());
+        assertEquals("user с id=" + userId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -117,10 +109,9 @@ public class UserServiceTest {
         storage.createUser(user);
         int userId = 999;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getFriends(userId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.getFriends(userId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("user с id=" + userId + " не найден.", exception.getReason());
+        assertEquals("user с id=" + userId + " не найден.", exception.getMessage());
     }
 
     @Test
@@ -128,9 +119,8 @@ public class UserServiceTest {
         int userId = 0;
         int filmId = -1;
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.haveCommonFriends(userId, filmId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> service.haveCommonFriends(userId, filmId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("id не может быть отрицательным.", exception.getReason());
+        assertEquals("user с id=" + userId + " не найден.", exception.getMessage());
     }
 }

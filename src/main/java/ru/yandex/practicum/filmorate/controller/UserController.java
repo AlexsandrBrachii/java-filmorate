@@ -1,42 +1,37 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
+import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser;
 
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserStorage userStorage;
+
     private final UserService userService;
 
-    @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
-        this.userService = userService;
-    }
 
 
 
     @GetMapping
     private Collection<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
     @GetMapping(value = "/{id}")
     private User getUser(@PathVariable int id) {
-        return userStorage.getUser(id);
+        return userService.getUser(id);
     }
 
     @GetMapping(value = "/{id}/friends")
@@ -51,12 +46,14 @@ public class UserController {
 
     @PostMapping
     private User createUser(@RequestBody User user) {
-        return userStorage.createUser(user);
+        validateUser(user);
+        return userService.createUser(user);
     }
 
     @PutMapping
     private User updateUser(@RequestBody User user) {
-        return userStorage.updateUser(user);
+        validateUser(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping(value = "/{id}/friends/{friendId}")
@@ -68,5 +65,7 @@ public class UserController {
     private void deleteFriend(@PathVariable int id, @PathVariable long friendId) {
         userService.deleteFriend(id, friendId);
     }
+
+
 }
 
