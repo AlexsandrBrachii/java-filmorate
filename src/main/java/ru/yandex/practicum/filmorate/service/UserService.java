@@ -34,32 +34,32 @@ public class UserService {
     }
 
 
-    public void addFriend(int idUser, long idFriend) {
+    public void addFriend(int idUser, int idFriend) {
         User user = userStorage.getUser(idUser);
         User friend = userStorage.getUser((int) idFriend);
         user.getFriends().add(idFriend);
         log.info("friend с id=" + idFriend + " добавлен в друзья user с id=" + idUser);
-        friend.getFriends().add((long) idUser);
+        friend.getFriends().add(idUser);
         log.info("User с id=" + idUser + " добавлен в друзья user с id=" + idFriend);
     }
 
-    public void deleteFriend(int idUser, long idFriend) {
+    public void deleteFriend(int idUser, int idFriend) {
         User user = userStorage.getUser(idUser);
-        User friend = userStorage.getUser((int) idFriend);
+        User friend = userStorage.getUser(idFriend);
         user.getFriends().remove(idFriend);
         log.info("friend с id=" + idFriend + " удалён из друзей user с id=." + idUser);
-        friend.getFriends().remove((long) idUser);
+        friend.getFriends().remove(idUser);
         log.info("User с id=" + idUser + " удалён из друзей user с id=" + idFriend);
     }
 
     public List<User> getFriends(int idUser) {
         List<User> friends = new ArrayList<>();
         User user = userStorage.getUser(idUser);
-        Set<Long> idFriends = user.getFriends();
+        Set<Integer> idFriends = user.getFriends();
         if (idFriends.isEmpty()) {
             log.info("У user c id=" + idUser + " не найдено друзей.");
         } else {
-            for (Long idFriend : idFriends) {
+            for (Integer idFriend : idFriends) {
                 User friend = userStorage.getUser(Math.toIntExact(idFriend));
                 friends.add(friend);
             }
