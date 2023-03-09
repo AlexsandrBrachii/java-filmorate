@@ -4,12 +4,14 @@ package ru.yandex.practicum.filmorate.validator;
 import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.web.bind.annotation.ResponseBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 @Slf4j
 public class UserValidator {
 
+    @ResponseBody
     public static void validateUser(User user) {
         try {
             if (user.getEmail() == null || !user.getEmail().contains("@")) {

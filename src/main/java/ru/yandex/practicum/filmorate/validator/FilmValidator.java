@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Slf4j
 public class FilmValidator {
 
+
     public static void validateFilm(Film film) {
         try {
             if (film.getName().isBlank()) {
