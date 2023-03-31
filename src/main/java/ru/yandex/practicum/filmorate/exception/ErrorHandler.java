@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.exception;
 
 import org.springframework.http.HttpStatus;
@@ -28,3 +29,4 @@ public class ErrorHandler {
         return Map.of(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
+*/
