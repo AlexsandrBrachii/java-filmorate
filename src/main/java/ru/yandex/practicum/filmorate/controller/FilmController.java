@@ -5,12 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.service.FilmService;
-
-
 import java.util.Collection;
 
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
-
 
 @Slf4j
 @RestController
@@ -18,9 +15,7 @@ import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm
 @RequestMapping("/films")
 public class FilmController {
 
-
     private final FilmService filmService;
-
 
     @GetMapping
     private Collection<Film> getAllFilms() {
@@ -58,7 +53,4 @@ public class FilmController {
     private void deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLike(id, userId);
     }
-
-
-
 }

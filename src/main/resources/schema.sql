@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS genres (
   genre_id IDENTITY PRIMARY KEY,
-  name VARCHAR(255) NOT NULL
+  genre_name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS mpa (
   mpa_id IDENTITY PRIMARY KEY,
-  name VARCHAR(255) NOT NULL
+  mpa_name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -16,25 +16,29 @@ CREATE TABLE IF NOT EXISTS users (
   birthday DATE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS likes (
-  like_id IDENTITY PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (user_id)
-);
-
 CREATE TABLE IF NOT EXISTS films (
   film_id IDENTITY PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description VARCHAR(255) NOT NULL,
-  rating VARCHAR(255),
+  rate INTEGER,
   releaseDate DATE NOT NULL,
   duration INTEGER NOT NULL,
-  genre_id INTEGER,
   mpa_id INTEGER,
-  likes_id INTEGER,
-  FOREIGN KEY (genre_id) REFERENCES genres (genre_id),
-  FOREIGN KEY (mpa_id) REFERENCES mpa (mpa_id),
-  FOREIGN KEY (likes_id) REFERENCES likes (like_id)
+  FOREIGN KEY (mpa_id) REFERENCES mpa (mpa_id)
+);
+
+CREATE TABLE IF NOT EXISTS likes (
+  film_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (user_id),
+  FOREIGN KEY (film_id) REFERENCES films (film_id)
+);
+
+CREATE TABLE IF NOT EXISTS film_genres (
+  film_id INTEGER,
+  genre_id INTEGER,
+  FOREIGN KEY (film_id) REFERENCES films (film_id),
+  FOREIGN KEY (genre_id) REFERENCES genres (genre_id)
 );
 
 CREATE TABLE IF NOT EXISTS friends (
@@ -44,11 +48,3 @@ CREATE TABLE IF NOT EXISTS friends (
   FOREIGN KEY (friend_id) REFERENCES users (user_id),
   PRIMARY KEY (user_id, friend_id)
 );
-
-CREATE TABLE IF NOT EXISTS film_genres (
-  film_id INTEGER NOT NULL,
-  genre_id INTEGER NOT NULL,
-  FOREIGN KEY (film_id) REFERENCES films (film_id),
-  FOREIGN KEY (genre_id) REFERENCES genres (genre_id)
-);
-

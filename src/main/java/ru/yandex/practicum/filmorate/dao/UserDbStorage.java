@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -30,13 +29,9 @@ public class UserDbStorage implements UserStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
-
     @Override
     public User getUser(int id) {
-
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
-
         User user = null;
         if (userRows.next()) {
             user = User.builder().id(id)
@@ -52,9 +47,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUsers() {
-
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users");
-
         Collection<User> users = new ArrayList<>();
         while (userRows.next()) {
             User user = User.builder().id(userRows.getInt("user_id"))
@@ -66,7 +59,6 @@ public class UserDbStorage implements UserStorage {
         }
         return users;
     }
-
 
     @Override
     public User createUser(User user) {
@@ -80,7 +72,6 @@ public class UserDbStorage implements UserStorage {
             ps.setDate(4, Date.valueOf(user.getBirthday()));
             return ps;
         }, keyHolder);
-
         Integer id = keyHolder.getKey().intValue();
         user.setId(id);
         return user;
@@ -93,7 +84,6 @@ public class UserDbStorage implements UserStorage {
         if (count == 0) {
             throw new NotFoundException("User с id " + user.getId() + " не найден.");
         }
-
         String sql = "UPDATE users SET email=?, login=?, name=?, birthday=? WHERE user_id=?";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
@@ -102,13 +92,11 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(int idUser, int idFriend) {
         User user = getUser(idUser);
         User friend = getUser(idFriend);
-
         String selectSql = "SELECT COUNT(*) FROM users WHERE user_id=?";
         int count = jdbcTemplate.queryForObject(selectSql, Integer.class, idFriend);
         if (count == 0) {
             throw new NotFoundException("User с id " + user.getId() + " не найден.");
         }
-
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, idUser, idFriend);
         log.info("Вы в друзьях у друга с id=" + idFriend);
@@ -132,6 +120,3 @@ public class UserDbStorage implements UserStorage {
         return list;
     }
 }
-
-
-

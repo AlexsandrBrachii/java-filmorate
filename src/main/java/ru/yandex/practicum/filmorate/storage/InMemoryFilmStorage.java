@@ -4,21 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import java.util.Collection;
 import java.util.HashMap;
-
-
 
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-
     private Integer identifier = 1;
 
     private HashMap<Integer, Film> films = new HashMap<>();
-
 
     @Override
     public Film getFilm(int id) {

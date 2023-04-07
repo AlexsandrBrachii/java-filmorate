@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-
 import java.util.*;
 
 @Slf4j
@@ -16,9 +15,6 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final UserDbStorage userDbStorage;
-
-
-
 
     public Collection<User> getAllUsers() {
         return userDbStorage.getAllUsers();
@@ -49,16 +45,12 @@ public class UserService {
     }
 
     public List<User> haveCommonFriends(int idUser, int idFriend) {
-
         List<User> friendsUser = getFriends(idUser);
         List<User> friendsFriend = getFriends(idFriend);
-
         friendsUser.retainAll(friendsFriend);
-
         if (friendsUser.isEmpty()) {
             log.info("Не найдено общих друзей.");
         }
         return friendsUser;
     }
-
 }
