@@ -89,25 +89,26 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
+    @Override
     public void addFriend(int idUser, int idFriend) {
-        User user = getUser(idUser);
-        User friend = getUser(idFriend);
         String selectSql = "SELECT COUNT(*) FROM users WHERE user_id=?";
         int count = jdbcTemplate.queryForObject(selectSql, Integer.class, idFriend);
         if (count == 0) {
-            throw new NotFoundException("User с id " + user.getId() + " не найден.");
+            throw new NotFoundException("User с id " + idUser + " не найден.");
         }
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, idUser, idFriend);
         log.info("Вы в друзьях у друга с id=" + idFriend);
     }
 
+    @Override
     public void deleteFriend(int idUser, int idFriend) {
         String sql = "delete from friends where user_id=? and friend_id=?";
         jdbcTemplate.update(sql, idUser, idFriend);
         log.info("user с id=" + idFriend + " удалён из друзей user с id=" + idUser);
     }
 
+    @Override
     public List<User> getFriends(int idUser) {
         String sql = "select u.* from friends f join users u on f.friend_id = u.user_id where f.user_id=?";
         List<User> list = jdbcTemplate.query(sql, new Object[]{idUser},

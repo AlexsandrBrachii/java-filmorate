@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -51,5 +52,20 @@ public class InMemoryUserStorage implements UserStorage {
         users.put(user.getId(), user);
         log.info("user " + user.getName() + " обновлён.");
         return user;
+    }
+
+    @Override
+    public void addFriend(int idUser, int idFriend) {
+
+    }
+
+    @Override
+    public void deleteFriend(int idUser, int idFriend) {
+
+    }
+
+    @Override
+    public List<User> getFriends(int idUser) {
+        return null;
     }
 }
