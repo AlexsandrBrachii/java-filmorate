@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.MPA;
 import java.util.Collection;
 import java.util.List;
@@ -29,10 +28,10 @@ public class MpaDbStorage {
     public MPA getMpaById(int id) {
         String sqlGetMpa = "SELECT * FROM mpa WHERE mpa_id = ?";
         List<MPA> mpaById = jdbcTemplate.query(sqlGetMpa, FilmDbStorage::makeMpa, id);
-        if (mpaById.isEmpty()) {
-            throw new NotFoundException("MPA с id=" + id + "не найден");
+        MPA mpa = null;
+        if (!mpaById.isEmpty()) {
+            mpa = mpaById.get(0);
         }
-        MPA mpa = mpaById.get(0);
         return mpa;
     }
 }

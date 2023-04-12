@@ -52,19 +52,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("film " + film.getName() + " обновлён.");
         return film;
     }
-
-    @Override
-    public void makeLike(int idFilm, int idUser) {
-
-    }
-
-    @Override
-    public void deleteLike(int idFilm, int idUser) {
-
-    }
-
-    @Override
-    public Collection<Film> getPopularFilms(int count) {
-        return null;
-    }
 }

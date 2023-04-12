@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserStorageDb;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 
@@ -13,36 +14,43 @@ import java.util.*;
 @Service
 public class UserService {
 
-    private final UserStorage userStorage;
+    private final UserStorageDb userStorageDb;
 
     public Collection<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userStorageDb.getAllUsers();
     }
 
     public User getUser(int id) {
-        return userStorage.getUser(id);
+        User user = userStorageDb.getUser(id);
+        if (user == null) {
+            throw new NotFoundException("User с id " + id + " не найден.");
+        }
+        return user;
     }
 
     public User createUser(User user) {
-        return userStorage.createUser(user);
+        return userStorageDb.createUser(user);
     }
 
     public User updateUser(User user) {
-        return userStorage.updateUser(user);
+        getUser(user.getId());
+        return userStorageDb.updateUser(user);
     }
 
     public void addFriend(int idUser, int idFriend) {
-        userStorage.getUser(idUser);
-        userStorage.getUser(idFriend);
-        userStorage.addFriend(idUser, idFriend);
+        getUser(idUser);
+        getUser(idFriend);
+        userStorageDb.addFriend(idUser, idFriend);
     }
 
     public void deleteFriend(int idUser, int idFriend) {
-        userStorage.deleteFriend(idUser, idFriend);
+        getUser(idUser);
+        getUser(idFriend);
+        userStorageDb.deleteFriend(idUser, idFriend);
     }
 
     public List<User> getFriends(int idUser) {
-        return userStorage.getFriends(idUser);
+        return userStorageDb.getFriends(idUser);
     }
 
     public List<User> haveCommonFriends(int idUser, int idFriend) {

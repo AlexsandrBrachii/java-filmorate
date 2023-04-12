@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
 
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
+    private final UserStorageDb userStorage;
+    private final FilmStorageDb filmStorage;
 
     @Test
     @DirtiesContext

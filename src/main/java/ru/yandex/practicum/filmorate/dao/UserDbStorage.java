@@ -7,9 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -20,7 +18,7 @@ import java.util.List;
 @Component
 @Primary
 @Slf4j
-public class UserDbStorage implements UserStorage {
+public class UserDbStorage implements UserStorageDb {
 
     private Integer identifier = 1;
     private final JdbcTemplate jdbcTemplate;
@@ -39,8 +37,6 @@ public class UserDbStorage implements UserStorage {
                     .login(userRows.getString("login"))
                     .name(userRows.getString("name"))
                     .birthday(userRows.getDate("birthday").toLocalDate()).build();
-        } else {
-            throw new NotFoundException("User с id " + id + " не найден.");
         }
         return user;
     }
@@ -79,11 +75,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        String selectSql = "SELECT COUNT(*) FROM users WHERE user_id=?";
-        int count = jdbcTemplate.queryForObject(selectSql, Integer.class, user.getId());
-        if (count == 0) {
-            throw new NotFoundException("User с id " + user.getId() + " не найден.");
-        }
         String sql = "UPDATE users SET email=?, login=?, name=?, birthday=? WHERE user_id=?";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
@@ -91,11 +82,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int idUser, int idFriend) {
-        String selectSql = "SELECT COUNT(*) FROM users WHERE user_id=?";
-        int count = jdbcTemplate.queryForObject(selectSql, Integer.class, idFriend);
-        if (count == 0) {
-            throw new NotFoundException("User с id " + idUser + " не найден.");
-        }
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, idUser, idFriend);
         log.info("Вы в друзьях у друга с id=" + idFriend);

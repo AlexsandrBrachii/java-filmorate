@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserDbStorageTest {
 
-    private final UserDbStorage userStorage;
+    private final UserStorageDb userStorage;
 
     @Test
     @DirtiesContext
