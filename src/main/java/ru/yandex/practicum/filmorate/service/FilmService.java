@@ -4,12 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
+import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.User;
+
 import java.util.Collection;
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -17,7 +22,7 @@ import java.util.List;
 public class FilmService {
 
     private final FilmStorageDb filmStorageDb;
-    private final UserService userService;
+    private final UserStorageDb userStorageDb;
 
     public Film getFilm(int id) {
         Film film = filmStorageDb.getFilm(id);
@@ -34,6 +39,7 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
+        validateFilm(film);
         MPA mpa = filmStorageDb.checkMpa(film);
         List<Genre> genres = filmStorageDb.checkGenre(film);
         Film film1 = filmStorageDb.addFilm(film);
@@ -44,6 +50,7 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
+        validateFilm(film);
         getFilm(film.getId());
         MPA mpa = filmStorageDb.checkMpa(film);
         List<Genre> genres = filmStorageDb.checkGenre(film);
@@ -60,7 +67,10 @@ public class FilmService {
     }
 
     public void deleteLike(int idFilm, int idUser) {
-        userService.getUser(idUser);
+        User user = userStorageDb.getUser(idUser);
+        if (user == null) {
+            throw new NotFoundException("User с id " + idUser + " не найден.");
+        }
         filmStorageDb.deleteLike(idFilm, idUser);
     }
 

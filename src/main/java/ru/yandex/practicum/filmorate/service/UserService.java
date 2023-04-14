@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -29,10 +31,12 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        validateUser(user);
         return userStorageDb.createUser(user);
     }
 
     public User updateUser(User user) {
+        validateUser(user);
         getUser(user.getId());
         return userStorageDb.updateUser(user);
     }

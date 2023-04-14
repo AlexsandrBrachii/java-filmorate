@@ -41,6 +41,7 @@ public class FilmDbStorage implements FilmStorageDb {
                     .description(filmRows.getString("description"))
                     .releaseDate(filmRows.getDate("releaseDate").toLocalDate())
                     .duration(filmRows.getInt("duration"))
+                    .rate(filmRows.getInt("rate"))
                     .mpa(mpa)
                     .build();
         }
@@ -66,6 +67,7 @@ public class FilmDbStorage implements FilmStorageDb {
                         .description(rs.getString("description"))
                         .releaseDate(rs.getDate("releaseDate").toLocalDate())
                         .duration(rs.getInt("duration"))
+                        .rate(rs.getInt("rate"))
                         .mpa(FilmDbStorage.makeMpa(rs, 0))
                         .genres(new ArrayList<>())
                         .build();
@@ -83,8 +85,8 @@ public class FilmDbStorage implements FilmStorageDb {
 
     @Override
     public Film addFilm(Film film) {
-        String sqlInsertFilm = "INSERT INTO films (name, description, releaseDate, duration, mpa_id) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sqlInsertFilm = "INSERT INTO films (name, description, releaseDate, duration, rate, mpa_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sqlInsertFilm, Statement.RETURN_GENERATED_KEYS);
@@ -92,7 +94,8 @@ public class FilmDbStorage implements FilmStorageDb {
             ps.setString(2, film.getDescription());
             ps.setDate(3, java.sql.Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setInt(5, film.getMpa().getId());
+            ps.setInt(5, film.getRate() != null ? film.getRate() : 0);
+            ps.setInt(6, film.getMpa().getId());
             return ps;
         }, keyHolder);
         int filmId = keyHolder.getKey().intValue();
@@ -102,12 +105,13 @@ public class FilmDbStorage implements FilmStorageDb {
 
     @Override
     public Film updateFilm(Film film) {
-        String sqlUpdateFilm = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+        String sqlUpdateFilm = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, rate = ?, mpa_id = ? WHERE film_id = ?";
         jdbcTemplate.update(sqlUpdateFilm,
                 film.getName(),
                 film.getDescription(),
                 java.sql.Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
+                film.getRate() != null ? film.getRate() : null,
                 film.getMpa() != null ? film.getMpa().getId() : null,
                 film.getId());
 

@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -40,13 +38,11 @@ public class UserController {
 
     @PostMapping
     private User createUser(@RequestBody User user) {
-        validateUser(user);
         return userService.createUser(user);
     }
 
     @PutMapping
     private User updateUser(@RequestBody User user) {
-        validateUser(user);
         return userService.updateUser(user);
     }
 

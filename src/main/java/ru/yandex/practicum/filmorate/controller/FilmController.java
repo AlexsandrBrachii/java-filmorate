@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import java.util.Collection;
 
-import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -34,13 +32,11 @@ public class FilmController {
 
     @PostMapping
     private Film addFilm(@RequestBody Film film) {
-        validateFilm(film);
         return filmService.addFilm(film);
     }
 
     @PutMapping
     private Film updateFilm(@RequestBody Film film) {
-        validateFilm(film);
         return filmService.updateFilm(film);
     }
 

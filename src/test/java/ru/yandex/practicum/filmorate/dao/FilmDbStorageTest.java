@@ -6,26 +6,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
 
-    private final UserStorageDb userStorage;
+    private final UserService userService;
+    private final FilmService filmService;
     private final FilmStorageDb filmStorage;
 
     @Test
     @DirtiesContext
-    void getFilm_withNormalBehavior() {
+    void getFilmLikes_withNormanBehavior() {
         Film filmTest = Film.builder()
                 .id(1)
                 .name("name")
@@ -34,103 +41,7 @@ public class FilmDbStorageTest {
                 .duration(90)
                 .rate(4)
                 .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
-
-        Optional<Film> filmOptional = Optional.ofNullable(filmStorage.getFilm(filmTest.getId()));
-
-        assertTrue(filmOptional.isPresent());
-        Film film = filmOptional.get();
-        assertEquals(1, film.getId());
-    }
-
-    @Test
-    @DirtiesContext
-    void getAllFilms_withNormalBehavior() {
-        Film filmTest = Film.builder()
-                .id(1)
-                .name("name")
-                .description("description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
-        Film filmTest1 = Film.builder()
-                .id(2)
-                .name("name")
-                .description("description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest1);
-
-        Collection<Film> films = filmStorage.getAllFilms();
-
-        assertEquals(2, films.size());
-    }
-
-    @Test
-    @DirtiesContext
-    void addFilm_withNormalBehavior() {
-        Film filmTest = Film.builder()
-                .id(1)
-                .name("name")
-                .description("description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
-
-        Optional<Film> filmOptional = Optional.ofNullable(filmStorage.getFilm(filmTest.getId()));
-
-        assertTrue(filmOptional.isPresent());
-        Film film = filmOptional.get();
-        assertEquals(1, film.getId());
-    }
-
-    @Test
-    @DirtiesContext
-    void updateFilm_withNormalBehavior() {
-        Film filmTest = Film.builder()
-                .id(1)
-                .name("name")
-                .description("description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
-        Film filmTest1 = Film.builder()
-                .id(1)
-                .name("name")
-                .description("new description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.updateFilm(filmTest1);
-
-        Optional<Film> filmOptional = Optional.ofNullable(filmStorage.getFilm(filmTest.getId()));
-
-        assertTrue(filmOptional.isPresent());
-        Film film = filmOptional.get();
-        assertEquals("new description", film.getDescription());
-    }
-
-    @Test
-    @DirtiesContext
-    void makeLike_withNormalBehavior() {
-        Film filmTest = Film.builder()
-                .id(1)
-                .name("name")
-                .description("description")
-                .releaseDate(LocalDate.of(2012, 1, 1))
-                .duration(90)
-                .rate(4)
-                .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
+        filmService.addFilm(filmTest);
 
         User userTest = User.builder()
                 .id(1)
@@ -138,9 +49,9 @@ public class FilmDbStorageTest {
                 .login("awb")
                 .name("Alex")
                 .birthday(LocalDate.of(1996, 8, 9)).build();
-        userStorage.createUser(userTest);
+        userService.createUser(userTest);
+        filmService.makeLike(filmTest.getId(), userTest.getId());
 
-        filmStorage.makeLike(filmTest.getId(), userTest.getId());
         List<Integer> likes = filmStorage.getFilmLikes(filmTest.getId());
 
         assertEquals(1, likes.size());
@@ -149,7 +60,7 @@ public class FilmDbStorageTest {
 
     @Test
     @DirtiesContext
-    void deleteLike() {
+    void checkMpa_withNormalBehavior() {
         Film filmTest = Film.builder()
                 .id(1)
                 .name("name")
@@ -158,26 +69,136 @@ public class FilmDbStorageTest {
                 .duration(90)
                 .rate(4)
                 .mpa(new MPA(4, "R")).build();
-        filmStorage.addFilm(filmTest);
+        filmService.addFilm(filmTest);
 
-        User userTest = User.builder()
+        MPA mpa = filmStorage.checkMpa(filmTest);
+
+        assertEquals(4, mpa.getId());
+        assertEquals("R", mpa.getName());
+    }
+
+
+    @Test
+    @DirtiesContext
+    void checkMpa_withWrongMpaId() {
+        Film filmTest = Film.builder()
                 .id(1)
-                .email("awb@mail.ru")
-                .login("awb")
-                .name("Alex")
-                .birthday(LocalDate.of(1996, 8, 9)).build();
-        userStorage.createUser(userTest);
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2012, 1, 1))
+                .duration(90)
+                .rate(4)
+                .mpa(new MPA(9, "R")).build();
 
-        filmStorage.makeLike(filmTest.getId(), userTest.getId());
-        List<Integer> likes = filmStorage.getFilmLikes(filmTest.getId());
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            filmService.addFilm(filmTest);
+        });
 
-        assertEquals(1, likes.size());
-        assertEquals(userTest.getId(), likes.get(0));
+        assertEquals("Не найден MPA с id: 9", exception.getMessage());
+    }
 
-        filmStorage.deleteLike(filmTest.getId(), userTest.getId());
+    @Test
+    @DirtiesContext
+    void checkGenre_withNormalBehavior() {
+        List<Genre> genres = new ArrayList<>();
+        Genre genre = new Genre(1, "Комедия");
+        genres.add(genre);
+        Film filmTest = Film.builder()
+                .id(1)
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2012, 1, 1))
+                .duration(90)
+                .rate(4)
+                .mpa(new MPA(4, "R"))
+                .genres(genres).build();
+        filmService.addFilm(filmTest);
 
-        List<Integer> likes1 = filmStorage.getFilmLikes(filmTest.getId());
+        List<Genre> genreList = filmStorage.checkGenre(filmTest);
 
-        assertTrue(likes1.isEmpty());
+        assertEquals(1, genreList.size());
+        Genre genre1 = genreList.get(0);
+        assertEquals(1, genre1.getId());
+        assertEquals("Комедия", genre1.getName());
+    }
+
+    @Test
+    @DirtiesContext
+    void checkGenre_withWrongGenreId() {
+        List<Genre> genres = new ArrayList<>();
+        Genre genre = new Genre(9, "Комедия");
+        genres.add(genre);
+        Film filmTest = Film.builder()
+                .id(1)
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2012, 1, 1))
+                .duration(90)
+                .rate(4)
+                .mpa(new MPA(4, "R"))
+                .genres(genres).build();
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            filmService.addFilm(filmTest);
+        });
+
+        assertEquals("Не найден Genre с id: 9", exception.getMessage());
+    }
+
+    @Test
+    @DirtiesContext
+    void insertFilmGenres_withNormalBehavior() {
+        List<Genre> genres = new ArrayList<>();
+        Genre genre = new Genre(1, "Комедия");
+        Genre genre1 = new Genre(2, "Драма");
+        genres.add(genre);
+        genres.add(genre1);
+        Film filmTest = Film.builder()
+                .id(1)
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2012, 1, 1))
+                .duration(90)
+                .rate(4)
+                .mpa(new MPA(4, "R"))
+                .genres(genres).build();
+        filmStorage.addFilm(filmTest);
+        filmTest.setGenres(genres);
+        filmStorage.insertFilmGenres(filmTest);
+
+        List<Genre> genreList = filmStorage.getGenres(filmTest.getId());
+
+        assertEquals(2, genreList.size());
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteFilmGenres_withNormalBehavior() {
+        List<Genre> genres = new ArrayList<>();
+        Genre genre = new Genre(1, "Комедия");
+        Genre genre1 = new Genre(2, "Драма");
+        genres.add(genre);
+        genres.add(genre1);
+        Film filmTest = Film.builder()
+                .id(1)
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2012, 1, 1))
+                .duration(90)
+                .rate(4)
+                .mpa(new MPA(4, "R"))
+                .genres(genres).build();
+        filmStorage.addFilm(filmTest);
+        filmTest.setGenres(genres);
+        filmStorage.insertFilmGenres(filmTest);
+
+        List<Genre> genreList = filmStorage.getGenres(filmTest.getId());
+
+        assertEquals(2, genreList.size());
+
+        filmStorage.deleteFilmGenres(filmTest);
+        List<Genre> genreList1 = filmStorage.getGenres(filmTest.getId());
+
+        assertEquals(0, genreList1.size());
     }
 }

@@ -34,6 +34,4 @@ public interface FilmStorageDb {
     void insertFilmGenres(Film film);
 
     void deleteFilmGenres(Film film);
-
-
 }
