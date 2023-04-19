@@ -4,10 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-
 import java.util.Collection;
 import java.util.HashMap;
-
 
 @Slf4j
 @Component
@@ -16,7 +14,6 @@ public class InMemoryUserStorage implements UserStorage {
     private Integer identifier = 1;
 
     private HashMap<Integer, User> users = new HashMap<>();
-
 
     @Override
     public User getUser(int id) {
@@ -55,6 +52,4 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("user " + user.getName() + " обновлён.");
         return user;
     }
-
-
 }

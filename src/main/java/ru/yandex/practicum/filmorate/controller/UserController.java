@@ -5,12 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-
 import java.util.Collection;
 import java.util.List;
-
-import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser;
-
 
 @Slf4j
 @RestController
@@ -18,11 +14,7 @@ import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser
 @RequestMapping("/users")
 public class UserController {
 
-
     private final UserService userService;
-
-
-
 
     @GetMapping
     private Collection<User> getAllUsers() {
@@ -46,13 +38,11 @@ public class UserController {
 
     @PostMapping
     private User createUser(@RequestBody User user) {
-        validateUser(user);
         return userService.createUser(user);
     }
 
     @PutMapping
     private User updateUser(@RequestBody User user) {
-        validateUser(user);
         return userService.updateUser(user);
     }
 
@@ -65,7 +55,4 @@ public class UserController {
     private void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         userService.deleteFriend(id, friendId);
     }
-
-
 }
-

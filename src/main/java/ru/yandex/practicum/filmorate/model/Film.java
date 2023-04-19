@@ -1,12 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
+import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
+@Builder
+@Jacksonized
 public class Film {
 
     private Integer id;
@@ -14,7 +17,8 @@ public class Film {
     private final String description;
     private final LocalDate releaseDate;
     private final Integer duration;
-    private Set<Long> likes = new HashSet<>();
-
+    private final Integer rate;
+    private MPA mpa;
+    private List<Genre> genres;
+    private Set<Integer> likes;
 }
-
