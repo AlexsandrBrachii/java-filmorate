@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -16,10 +14,14 @@ public class InMemoryUserStorageTest {
     @Autowired
     private InMemoryUserStorage storage;
 
-
     @Test
     void getUser_WithNormalBehavior() {
-        User user = new User( "awb@mail.ru", "awb", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .email("awb@mail.ru")
+                .login("awb")
+                .name("name")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         storage.createUser(user);
 
@@ -37,7 +39,12 @@ public class InMemoryUserStorageTest {
 
     @Test
     void updateUser_WithoutId() {
-        User user = new User( "awb@mail.ru", "awb", LocalDate.parse("1996-09-08"));
+        User user = User.builder()
+                .email("awb@mail.ru")
+                .login("awb")
+                .name("name")
+                .birthday(LocalDate.parse("1996-09-08"))
+                .build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> storage.updateUser(user));
 

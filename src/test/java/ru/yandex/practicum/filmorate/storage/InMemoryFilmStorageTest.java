@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -16,11 +14,13 @@ public class InMemoryFilmStorageTest {
     @Autowired
     private InMemoryFilmStorage storage;
 
-
     @Test
     void getFilm_WithNormalBehavior() {
-        Film film = new Film("Челюсти", "Про акулу",
-                LocalDate.of(2000, 1, 1), 90);
+        Film film = Film.builder()
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(90).build();
 
         storage.addFilm(film);
 
@@ -38,11 +38,12 @@ public class InMemoryFilmStorageTest {
 
     @Test
     void updateFilm_WithoutId() {
-        Film film = new Film("Челюсти", "Про акулу",
-                LocalDate.of(2000, 1, 1), 90);
+        Film film = Film.builder()
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(90).build();
 
         assertThrows(NotFoundException.class, () -> storage.updateFilm(film));
     }
-
-
 }
