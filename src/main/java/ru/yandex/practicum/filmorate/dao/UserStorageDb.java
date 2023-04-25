@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -20,4 +21,6 @@ public interface UserStorageDb {
     void deleteFriend(int idUser, int idFriend);
 
     List<User> getFriends(int idUser);
+
+    List<Integer> getRecommendations(int userId);
 }

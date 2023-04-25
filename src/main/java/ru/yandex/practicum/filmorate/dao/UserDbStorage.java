@@ -7,13 +7,13 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Primary
@@ -97,13 +97,60 @@ public class UserDbStorage implements UserStorageDb {
     @Override
     public List<User> getFriends(int idUser) {
         String sql = "select u.* from friends f join users u on f.friend_id = u.user_id where f.user_id=?";
-        List<User> list = jdbcTemplate.query(sql, new Object[]{idUser},
+        return jdbcTemplate.query(sql, new Object[]{idUser},
                 (resultSet, i) -> User.builder().id(resultSet.getInt("user_id"))
                         .email(resultSet.getString("email"))
                         .login(resultSet.getString("login"))
                         .name(resultSet.getString("name"))
                         .birthday(resultSet.getDate("birthday").toLocalDate())
                         .build());
-        return list;
+    }
+
+    @Override
+    public List<Integer> getRecommendations(int userId) {
+        Map<User, List<Integer>> usersWithLikes = new HashMap<>();
+        String sql = "SELECT U1.*, L1.film_id, COUNT(*) AS likes_intersection " +
+                "FROM likes L1 " +
+                "JOIN likes L2 ON L1.film_id = L2.film_id " +
+                "JOIN users U1 ON L1.user_id = U1.user_id " +
+                "JOIN users U2 ON L2.user_id = U2.user_id  " +
+                "GROUP BY U1.user_id, U2.user_id " +
+                "HAVING COUNT(*) > 0 " +
+                "ORDER BY likes_intersection DESC " +
+                "LIMIT 10;";
+        String userLikesSql = "Select film_id from likes where user_id = ?";
+        SqlRowSet userLikesRs = jdbcTemplate.queryForRowSet(sql);
+        while (userLikesRs.next()) {
+            User user = User.builder().id(userLikesRs.getInt("user_id"))
+                    .email(userLikesRs.getString("email"))
+                    .login(userLikesRs.getString("login"))
+                    .name(userLikesRs.getString("name"))
+                    .birthday(userLikesRs.getDate("birthday").toLocalDate()).build();
+            int filmId = userLikesRs.getInt("film_id");
+            List<Integer> likes = usersWithLikes.getOrDefault(user, new ArrayList<>());
+            likes.add(filmId);
+            usersWithLikes.put(user, likes);
+        }
+        User targetUser = getUser(userId);
+        if (!usersWithLikes.containsKey(targetUser)) {
+            List<Integer> targetUserLikes = jdbcTemplate.queryForList(userLikesSql, Integer.class, userId);
+            usersWithLikes.put(targetUser, targetUserLikes);
+        }
+
+        List<Integer> recommendations = new ArrayList<>();
+        List<User> similarusers = new ArrayList<>(usersWithLikes.keySet());
+        for (User similaruser : similarusers) {
+            List<Integer> userLikes = usersWithLikes.get(similaruser);
+            userLikes.removeAll(usersWithLikes.get(targetUser));
+            recommendations.addAll(userLikes);
+        }
+
+        List<Integer> recommendedFilmsIds = new ArrayList<>();
+        for (int filmId : recommendations) {
+            if (!usersWithLikes.get(targetUser).contains(filmId)) {
+                recommendedFilmsIds.add(filmId);
+            }
+        }
+        return recommendedFilmsIds;
     }
 }

@@ -252,4 +252,12 @@ public class FilmDbStorage implements FilmStorageDb {
                 .mpa(rating).build();
         return film;
     }
+
+    public List<Film> getRecommendations(List<Integer> recommendedFilmsIds) {
+        String recommendedFilmsSql = "select * from films join MPA M on M.MPA_ID = FILMS.MPA_ID where film_id IN (?)";
+        List<Film> recommendedFilms = jdbcTemplate.query(recommendedFilmsSql, new Object[]{recommendedFilmsIds},
+                FilmDbStorage::makeFilm);
+        recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
+        return recommendedFilms;
+    }
 }
