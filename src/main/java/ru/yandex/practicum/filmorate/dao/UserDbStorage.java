@@ -8,6 +8,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
@@ -20,6 +22,7 @@ import java.util.*;
 @Slf4j
 public class UserDbStorage implements UserStorageDb {
 
+    private Integer identifier = 1;
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -119,7 +122,7 @@ public class UserDbStorage implements UserStorageDb {
                 "JOIN likes L2 ON L1.film_id = L2.film_id " +
                 "JOIN users U1 ON L1.user_id = U1.user_id " +
                 "JOIN users U2 ON L2.user_id = U2.user_id  " +
-                "GROUP BY U1.user_id, U2.user_id, L1.FILM_ID " +
+                "GROUP BY U1.user_id, U2.user_id " +
                 "HAVING COUNT(*) > 0 " +
                 "ORDER BY likes_intersection DESC " +
                 "LIMIT 10;";
@@ -136,10 +139,12 @@ public class UserDbStorage implements UserStorageDb {
             likes.add(filmId);
             usersWithLikes.put(user, likes);
         }
+        User targetUser = getUser(userId);
         if (!usersWithLikes.containsKey(targetUser)) {
             List<Integer> targetUserLikes = jdbcTemplate.queryForList(userLikesSql, Integer.class, userId);
             usersWithLikes.put(targetUser, targetUserLikes);
         }
+
         List<Integer> recommendations = new ArrayList<>();
         List<User> similarUsers = new ArrayList<>(usersWithLikes.keySet());
         for (User similaruser : similarUsers) {
@@ -150,6 +155,7 @@ public class UserDbStorage implements UserStorageDb {
             similarUserLikes.removeAll(usersWithLikes.get(targetUser));
             recommendations.addAll(similarUserLikes);
         }
+
         List<Integer> recommendedFilmsIds = new ArrayList<>();
         for (int filmId : recommendations) {
             if (!usersWithLikes.get(targetUser).contains(filmId)) {
