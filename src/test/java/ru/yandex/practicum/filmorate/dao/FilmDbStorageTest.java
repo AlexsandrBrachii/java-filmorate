@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -200,5 +201,37 @@ public class FilmDbStorageTest {
         List<Genre> genreList1 = filmStorage.getGenres(filmTest.getId());
 
         assertEquals(0, genreList1.size());
+    }
+
+    @Test
+    @DirtiesContext
+    void getCommonFilms_withNormalBehavior() {
+        User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
+        User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
+
+        userService.createUser(user1);
+        userService.createUser(user2);
+
+        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(MPA.builder().id(1).name("G").build()).build();
+        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(MPA.builder().id(1).name("G").build()).build();
+        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(MPA.builder().id(1).name("G").build()).build();
+        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(MPA.builder().id(1).name("G").build()).build();
+
+        filmStorage.addFilm(film1);
+        filmStorage.addFilm(film2);
+        filmStorage.addFilm(film3);
+        filmStorage.addFilm(film4);
+
+        filmStorage.makeLike(film1.getId(), user1.getId());
+        filmStorage.makeLike(film2.getId(), user2.getId());
+
+        filmStorage.makeLike(film3.getId(), user1.getId());
+        filmStorage.makeLike(film3.getId(), user2.getId());
+        filmStorage.makeLike(film4.getId(), user1.getId());
+        filmStorage.makeLike(film4.getId(), user2.getId());
+
+        Collection<Film> films = filmStorage.getCommonFilms(user1.getId(), user2.getId());
+
+        assertEquals(films, List.of(film4, film3));
     }
 }
