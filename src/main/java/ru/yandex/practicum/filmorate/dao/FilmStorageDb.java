@@ -35,4 +35,5 @@ public interface FilmStorageDb {
 
     void deleteFilmGenres(Film film);
 
+    Collection<Film> getCommonFilms(int userId, int friendId);
 }
