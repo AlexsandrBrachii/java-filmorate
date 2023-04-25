@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -208,6 +210,25 @@ public class FilmDbStorage implements FilmStorageDb {
         jdbcTemplate.update(sqlDeleteFilmGenres, film.getId());
     }
 
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sqlGetCommonFilms = "SELECT * " +
+                "FROM FILMS f " +
+                "JOIN (" +
+                "(SELECT film_id FROM LIKES WHERE user_id = ?) " +
+                "INTERSECT " +
+                "(SELECT film_id FROM LIKES WHERE user_id = ?)" +
+                ") q " +
+                "ON q.film_id = f.film_id " +
+                "LEFT JOIN MPA m ON m.mpa_id = f.mpa_id " +
+                "ORDER BY f.rate DESC";
+        List<Film> films = jdbcTemplate.query(sqlGetCommonFilms, FilmDbStorage::makeFilm, userId, friendId);
+        for (Film film : films) {
+            film.setGenres(getGenres(film.getId()));
+        }
+        return films;
+    }
+
     public static MPA makeMpa(ResultSet rs, int rowNum) throws SQLException {
         MPA mpa = MPA.builder()
                 .id(rs.getInt("mpa_id"))
@@ -232,5 +253,15 @@ public class FilmDbStorage implements FilmStorageDb {
                 .rate(rs.getInt("rate"))
                 .mpa(rating).build();
         return film;
+    }
+
+    public List<Film> getRecommendations(List<Integer> recommendedFilmsIds) {
+        String inSql = String.join(",", Collections.nCopies(recommendedFilmsIds.size(), "?"));
+        List<Film> recommendedFilms = jdbcTemplate.query(String.format("select * " +
+                "from films " +
+                "join MPA M on M.MPA_ID = FILMS.MPA_ID " +
+                "where film_id IN (%s)", inSql), recommendedFilmsIds.toArray(), FilmDbStorage::makeFilm);
+        recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
+        return recommendedFilms;
     }
 }
