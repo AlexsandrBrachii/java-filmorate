@@ -47,4 +47,6 @@ public interface FilmStorageDb {
     List<Film> findByDirectorIdAndSortByLikes(Integer directorId);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
+
+    Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year);
 }
