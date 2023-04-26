@@ -223,7 +223,7 @@ public class FilmDbStorage implements FilmStorageDb {
                 "LEFT JOIN MPA m ON m.mpa_id = f.mpa_id " +
                 "ORDER BY f.rate DESC";
         List<Film> films = jdbcTemplate.query(sqlGetCommonFilms, FilmDbStorage::makeFilm, userId, friendId);
-        for (Film film : films) {
+        for (Film film: films) {
             film.setGenres(getGenres(film.getId()));
         }
         return films;
