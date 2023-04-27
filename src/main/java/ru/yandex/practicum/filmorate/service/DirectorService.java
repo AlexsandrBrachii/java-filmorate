@@ -48,5 +48,4 @@ public class DirectorService {
   public void delete(Integer directorId) {
     directorRepository.remove(directorId);
   }
-  
 }

@@ -1,8 +1,5 @@
 package ru.yandex.practicum.filmorate.dao.h2;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -14,6 +11,10 @@ import ru.yandex.practicum.filmorate.dao.h2.constants.DirectorConst;
 import ru.yandex.practicum.filmorate.dao.h2.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.exception.DirectorException;
 import ru.yandex.practicum.filmorate.model.Director;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 @Repository
 public class DirectorH2Impl implements DirectorRepository {
@@ -56,7 +57,6 @@ public class DirectorH2Impl implements DirectorRepository {
               .usingGeneratedKeyColumns("id")
               .executeAndReturnKeyHolder(parameters);
 
-      
       final int addedDirectorId = kh.getKey().intValue();
 
       return Director.builder().id(addedDirectorId).name(director.getName()).build();
