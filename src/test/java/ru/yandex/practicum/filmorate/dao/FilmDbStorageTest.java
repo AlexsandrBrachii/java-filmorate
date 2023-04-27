@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -40,7 +40,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -68,10 +68,10 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
-        MPA mpa = filmStorage.checkMpa(filmTest);
+        Mpa mpa = filmStorage.checkMpa(filmTest);
 
         assertEquals(4, mpa.getId());
         assertEquals("R", mpa.getName());
@@ -88,7 +88,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(9, "R")).build();
+                .mpa(new Mpa(9, "R")).build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
             filmService.addFilm(filmTest);
@@ -110,7 +110,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmService.addFilm(filmTest);
 
@@ -135,7 +135,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
@@ -160,7 +160,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
@@ -186,7 +186,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
