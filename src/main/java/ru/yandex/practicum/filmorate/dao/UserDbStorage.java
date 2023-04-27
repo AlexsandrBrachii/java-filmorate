@@ -114,28 +114,26 @@ public class UserDbStorage implements UserStorageDb {
         } catch (RuntimeException e) {
             throw new NotFoundException("пользователя с таким id не существует");
         }
-        String sql = "SELECT U1.*, L1.film_id, COUNT(*) AS likes_intersection " +
-                "FROM likes L1 " +
-                "JOIN likes L2 ON L1.film_id = L2.film_id " +
-                "JOIN users U1 ON L1.user_id = U1.user_id " +
-                "JOIN users U2 ON L2.user_id = U2.user_id  " +
-                "GROUP BY U1.user_id, U2.user_id, L1.FILM_ID " +
-                "HAVING COUNT(*) > 0 " +
+        String sql = "SELECT u2.*, COUNT(l2.film_id) as likes_intersection " +
+                "FROM likes l1 " +
+                "JOIN likes l2 ON l1.film_id = l2.film_id AND l1.user_id != l2.user_id " +
+                "JOIN users u2 on u2.user_id = l2.user_id " +
+                "WHERE l1.user_id = ? " +
+                "GROUP BY l1.user_id, l2.user_id, u2.user_id " +
                 "ORDER BY likes_intersection DESC " +
-                "LIMIT 10;";
+                "LIMIT 10";
         String userLikesSql = "Select film_id from likes where user_id = ?";
-        SqlRowSet userLikesRs = jdbcTemplate.queryForRowSet(sql);
+        SqlRowSet userLikesRs = jdbcTemplate.queryForRowSet(sql, userId);
         while (userLikesRs.next()) {
             User user = User.builder().id(userLikesRs.getInt("user_id"))
                     .email(userLikesRs.getString("email"))
                     .login(userLikesRs.getString("login"))
                     .name(userLikesRs.getString("name"))
                     .birthday(Objects.requireNonNull(userLikesRs.getDate("birthday")).toLocalDate()).build();
-            int filmId = userLikesRs.getInt("film_id");
-            List<Integer> likes = usersWithLikes.getOrDefault(user, new ArrayList<>());
-            likes.add(filmId);
-            usersWithLikes.put(user, likes);
+            usersWithLikes.put(user, new ArrayList<>());
         }
+        usersWithLikes.keySet().forEach(user -> usersWithLikes.get(user).addAll(jdbcTemplate.queryForList(userLikesSql,
+                Integer.class, user.getId())));
         if (!usersWithLikes.containsKey(targetUser)) {
             List<Integer> targetUserLikes = jdbcTemplate.queryForList(userLikesSql, Integer.class, userId);
             usersWithLikes.put(targetUser, targetUserLikes);
