@@ -1,13 +1,12 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
 import java.util.List;
-
-import ru.yandex.practicum.filmorate.model.Director;
 
 public interface FilmStorageDb {
 
@@ -41,7 +40,9 @@ public interface FilmStorageDb {
 
     Collection<Director> findDirectorsByFilmId(Integer filmId);
 
-    List<Film> findByDirectorIdAndSortBy(String sql, Integer directorId);
+    List<Film> findByDirectorIdAndSortByRelateDate(Integer directorId);
+
+    List<Film> findByDirectorIdAndSortByLikes(Integer directorId);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
 }

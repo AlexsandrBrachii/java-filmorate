@@ -1,9 +1,5 @@
 package ru.yandex.practicum.filmorate.dao;
 
-import java.sql.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -20,22 +16,19 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Component
 @Primary
 @Slf4j
 public class FilmDbStorage implements FilmStorageDb {
 
-    private static final String INSERT_FILMS_DIRECTORS =
-            "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
-    private static final String SELECT_FILMS_DIRECTORS_JOIN_ON_DIRECTORS =
-            "select d.* from films_directors fd join directors d on fd.director_id = d.id where fd.film_id = ?";
-
-    public static final String DELETE_FILMS_DIRECTORS_BY_FILM_ID =
-            "DELETE FROM films_directors WHERE film_id = ?";
-
-    private static final String SELECT_FILMS_DIRECTORS_BY_DIRECTORS_ID =
-            "select * from films_directors where director_id = ?";
     private final JdbcTemplate jdbcTemplate;
 
     private final DirectorMapper directorMapper;
@@ -240,18 +233,23 @@ public class FilmDbStorage implements FilmStorageDb {
     public void addDirectorsByFilmId(Collection<Director> directors, Integer filmId) {
         List<Object[]> batchArgs = new ArrayList<>();
         directors.forEach(director -> batchArgs.add(new Object[]{filmId, director.getId()}));
-        jdbcTemplate.update(DELETE_FILMS_DIRECTORS_BY_FILM_ID, filmId);
-        jdbcTemplate.batchUpdate(INSERT_FILMS_DIRECTORS, batchArgs);
+        jdbcTemplate.update(FilmSql.DELETE_FILMS_DIRECTORS_BY_FILM_ID, filmId);
+        jdbcTemplate.batchUpdate(FilmSql.INSERT_FILMS_DIRECTORS, batchArgs);
     }
 
     @Override
     public Collection<Director> findDirectorsByFilmId(Integer filmId) {
-        return jdbcTemplate.query(SELECT_FILMS_DIRECTORS_JOIN_ON_DIRECTORS, directorMapper, filmId);
+        return jdbcTemplate.query(FilmSql.SELECT_FILMS_DIRECTORS_JOIN_ON_DIRECTORS, directorMapper, filmId);
     }
 
     @Override
-    public List<Film> findByDirectorIdAndSortBy(String sql, Integer directorId) {
-        return jdbcTemplate.query(sql, filmSortedMapper, directorId);
+    public List<Film> findByDirectorIdAndSortByRelateDate(Integer directorId) {
+        return jdbcTemplate.query(FilmSql.FILMS_FILTERING_BY_RELEASE_DATE, filmSortedMapper, directorId);
+    }
+
+    @Override
+    public List<Film> findByDirectorIdAndSortByLikes(Integer directorId) {
+        return jdbcTemplate.query(FilmSql.FILMS_FILTERING_BY_LIKES, filmSortedMapper, directorId);
     }
 
     public static Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
@@ -297,5 +295,33 @@ public class FilmDbStorage implements FilmStorageDb {
                         .mpa(rating)
                         .build();
         return film;
+    }
+
+    private static class FilmSql {
+
+        static final String FILMS_FILTERING_BY_RELEASE_DATE =
+                "SELECT * FROM films AS f "
+                        + "INNER JOIN mpa m ON m.mpa_id = f.mpa_id "
+                        + "LEFT OUTER JOIN films_directors d ON f.film_id = d.film_id "
+                        + "LEFT OUTER JOIN likes l ON f.film_id = l.film_id "
+                        + "WHERE director_id = ? "
+                        + "GROUP BY f.film_id "
+                        + "ORDER BY f.releasedate";
+
+        static final String FILMS_FILTERING_BY_LIKES =
+                "SELECT * FROM films AS f "
+                        + "INNER JOIN mpa m ON m.mpa_id = f.mpa_id "
+                        + "LEFT OUTER JOIN films_directors d ON f.film_id = d.film_id "
+                        + "LEFT OUTER JOIN likes l ON f.film_id = l.film_id "
+                        + "WHERE director_id = ? "
+                        + "GROUP BY f.film_id "
+                        + "ORDER BY COUNT(DISTINCT l.user_id) DESC";
+        static final String INSERT_FILMS_DIRECTORS =
+                "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
+        static final String SELECT_FILMS_DIRECTORS_JOIN_ON_DIRECTORS =
+                "SELECT d.* FROM films_directors fd JOIN directors d ON fd.director_id = d.id WHERE fd.film_id = ?";
+
+        static final String DELETE_FILMS_DIRECTORS_BY_FILM_ID =
+                "DELETE FROM films_directors WHERE film_id = ?";
     }
 }

@@ -1,19 +1,21 @@
 package ru.yandex.practicum.filmorate.service;
 
-import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.DirectorRepository;
 import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
-import ru.yandex.practicum.filmorate.dao.h2.constants.FilmConst;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -121,8 +123,7 @@ public class FilmService {
         directorRepository.findById(directorId).orElseThrow(() -> new NotFoundException("404"));
 
         if (sortBy.equals("year")) {
-            return filmStorageDb.findByDirectorIdAndSortBy(
-                            FilmConst.FILMS_FILTERING_BY_RELEASE_DATE, directorId)
+            return filmStorageDb.findByDirectorIdAndSortByRelateDate(directorId)
                     .stream()
                     .peek(this::collectDirectors)
                     .peek(film -> {
@@ -131,8 +132,7 @@ public class FilmService {
                     })
                     .collect(Collectors.toList());
         } else if (sortBy.equals("likes")) {
-            return filmStorageDb.findByDirectorIdAndSortBy(
-                            FilmConst.FILMS_FILTERING_BY_LIKES, directorId)
+            return filmStorageDb.findByDirectorIdAndSortByLikes(directorId)
                     .stream()
                     .peek(this::collectDirectors)
                     .peek(film -> {
