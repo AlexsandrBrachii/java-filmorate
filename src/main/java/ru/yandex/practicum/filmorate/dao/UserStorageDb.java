@@ -15,6 +15,8 @@ public interface UserStorageDb {
 
     User updateUser(User user);
 
+    String deleteUser(int userId);
+
     void addFriend(int idUser, int idFriend);
 
     void deleteFriend(int idUser, int idFriend);

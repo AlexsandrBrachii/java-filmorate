@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
@@ -19,7 +21,6 @@ import java.util.*;
 @Slf4j
 public class UserDbStorage implements UserStorageDb {
 
-    private final Integer identifier = 1;
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -28,8 +29,9 @@ public class UserDbStorage implements UserStorageDb {
 
     @Override
     public User getUser(int id) {
+        User user;
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
-        User user = null;
+        user = null;
         if (userRows.next()) {
             user = User.builder().id(id)
                     .email(userRows.getString("email"))
@@ -80,6 +82,22 @@ public class UserDbStorage implements UserStorageDb {
     }
 
     @Override
+    public String deleteUser(int userId) {
+        try {
+            String sqlQuery = "DELETE  FROM FRIENDS WHERE USER_ID =? OR FRIEND_ID =?;" +
+                    "DELETE  FROM LIKES WHERE USER_ID =?;" +
+                    "DELETE  FROM USERS WHERE USER_ID =?;";
+
+            jdbcTemplate.update(sqlQuery, userId, userId, userId, userId);
+            log.info("Пользователь " + userId + " удалён.");
+        } catch (DataAccessException e) {
+            log.debug("Пользователь " + userId + " не удалён/ не найден в Базе.");
+            throw new NotFoundException("пользователь с id " + userId + " не может быть удалён");
+        }
+        return "Пользователь " + userId + " удалён.";
+    }
+
+    @Override
     public void addFriend(int idUser, int idFriend) {
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, idUser, idFriend);
@@ -95,6 +113,10 @@ public class UserDbStorage implements UserStorageDb {
 
     @Override
     public List<User> getFriends(int idUser) {
+        if (getUser(idUser) == null) {
+            log.debug("пользователь с id " + idUser + " не найден в базе данных.");
+            throw new NotFoundException("пользователь с id " + idUser + " не найден");
+        }
         String sql = "select u.* from friends f join users u on f.friend_id = u.user_id where f.user_id=?";
         return jdbcTemplate.query(sql, new Object[]{idUser},
                 (resultSet, i) -> User.builder().id(resultSet.getInt("user_id"))
