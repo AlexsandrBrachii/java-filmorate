@@ -306,11 +306,11 @@ public class UserServiceTest {
                 .name("Alex")
                 .birthday(LocalDate.of(1996, 8, 9)).build();
         userService.createUser(userTest);
-        List<User> UsersBeforeDelete = new ArrayList<>(userService.getAllUsers());
-        assertEquals(1, UsersBeforeDelete.size());
+        List<User> usersBeforeDelete = new ArrayList<>(userService.getAllUsers());
+        assertEquals(1, usersBeforeDelete.size());
 
         userService.deleteUser(1);
-        List<User> UsersAfterDelete = new ArrayList<>(userService.getAllUsers());
-        assertEquals(0, UsersAfterDelete.size());
+        List<User> usersAfterDelete = new ArrayList<>(userService.getAllUsers());
+        assertEquals(0, usersAfterDelete.size());
     }
 }
