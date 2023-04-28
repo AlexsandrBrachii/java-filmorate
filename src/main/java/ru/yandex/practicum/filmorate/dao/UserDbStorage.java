@@ -7,20 +7,19 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Primary
 @Slf4j
 public class UserDbStorage implements UserStorageDb {
 
-    private Integer identifier = 1;
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -36,7 +35,7 @@ public class UserDbStorage implements UserStorageDb {
                     .email(userRows.getString("email"))
                     .login(userRows.getString("login"))
                     .name(userRows.getString("name"))
-                    .birthday(userRows.getDate("birthday").toLocalDate()).build();
+                    .birthday(Objects.requireNonNull(userRows.getDate("birthday")).toLocalDate()).build();
         }
         return user;
     }
@@ -50,7 +49,7 @@ public class UserDbStorage implements UserStorageDb {
                     .email(userRows.getString("email"))
                     .login(userRows.getString("login"))
                     .name(userRows.getString("name"))
-                    .birthday(userRows.getDate("birthday").toLocalDate()).build();
+                    .birthday(Objects.requireNonNull(userRows.getDate("birthday")).toLocalDate()).build();
             users.add(user);
         }
         return users;
@@ -68,7 +67,7 @@ public class UserDbStorage implements UserStorageDb {
             ps.setDate(4, Date.valueOf(user.getBirthday()));
             return ps;
         }, keyHolder);
-        Integer id = keyHolder.getKey().intValue();
+        Integer id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         user.setId(id);
         return user;
     }
@@ -97,13 +96,67 @@ public class UserDbStorage implements UserStorageDb {
     @Override
     public List<User> getFriends(int idUser) {
         String sql = "select u.* from friends f join users u on f.friend_id = u.user_id where f.user_id=?";
-        List<User> list = jdbcTemplate.query(sql, new Object[]{idUser},
+        return jdbcTemplate.query(sql, new Object[]{idUser},
                 (resultSet, i) -> User.builder().id(resultSet.getInt("user_id"))
                         .email(resultSet.getString("email"))
                         .login(resultSet.getString("login"))
                         .name(resultSet.getString("name"))
                         .birthday(resultSet.getDate("birthday").toLocalDate())
                         .build());
-        return list;
+    }
+
+    @Override
+    public List<Integer> getRecommendations(int userId) {
+        Map<User, List<Integer>> usersWithLikes = new HashMap<>();
+        User targetUser;
+        try {
+            targetUser = getUser(userId);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("пользователя с таким id не существует");
+        }
+        String sql = "SELECT u2.*, COUNT(l2.film_id) as likes_intersection " +
+                "FROM likes l1 " +
+                "JOIN likes l2 ON l1.film_id = l2.film_id AND l1.user_id != l2.user_id " +
+                "JOIN users u2 on u2.user_id = l2.user_id " +
+                "WHERE l1.user_id = ? " +
+                "GROUP BY l1.user_id, l2.user_id, u2.user_id " +
+                "ORDER BY likes_intersection DESC " +
+                "LIMIT 10";
+        String userLikesSql = "Select film_id from likes where user_id = ?";
+        SqlRowSet userLikesRs = jdbcTemplate.queryForRowSet(sql, userId);
+        while (userLikesRs.next()) {
+            User user = User.builder().id(userLikesRs.getInt("user_id"))
+                    .email(userLikesRs.getString("email"))
+                    .login(userLikesRs.getString("login"))
+                    .name(userLikesRs.getString("name"))
+                    .birthday(Objects.requireNonNull(userLikesRs.getDate("birthday")).toLocalDate()).build();
+            usersWithLikes.put(user, new ArrayList<>());
+        }
+        usersWithLikes.keySet().forEach(user -> usersWithLikes.get(user).addAll(jdbcTemplate.queryForList(userLikesSql,
+                Integer.class, user.getId())));
+        if (!usersWithLikes.containsKey(targetUser)) {
+            List<Integer> targetUserLikes = jdbcTemplate.queryForList(userLikesSql, Integer.class, userId);
+            usersWithLikes.put(targetUser, targetUserLikes);
+        }
+
+        List<Integer> recommendations = new ArrayList<>();
+        List<User> similarUsers = new ArrayList<>(usersWithLikes.keySet());
+        for (User similaruser : similarUsers) {
+            if (similaruser.equals(targetUser)) {
+                continue;
+            }
+            List<Integer> similarUserLikes = usersWithLikes.get(similaruser);
+            similarUserLikes.removeAll(usersWithLikes.get(targetUser));
+            recommendations.addAll(similarUserLikes);
+        }
+
+        List<Integer> recommendedFilmsIds = new ArrayList<>();
+        for (int filmId : recommendations) {
+            if (!usersWithLikes.get(targetUser).contains(filmId)) {
+                recommendedFilmsIds.add(filmId);
+                log.info("Пользователю рекомендован фильм с id " + filmId);
+            }
+        }
+        return recommendedFilmsIds;
     }
 }

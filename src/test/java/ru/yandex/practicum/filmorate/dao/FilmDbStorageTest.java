@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -205,6 +206,7 @@ public class FilmDbStorageTest {
 
     @Test
     @DirtiesContext
+    @Order(1)
     void getCommonFilms_withNormalBehavior() {
         User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
         User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
