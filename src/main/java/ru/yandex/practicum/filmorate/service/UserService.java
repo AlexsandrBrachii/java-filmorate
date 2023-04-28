@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -17,6 +19,7 @@ import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser
 public class UserService {
 
     private final UserStorageDb userStorageDb;
+    private final FilmDbStorage filmDbStorage;
 
     public Collection<User> getAllUsers() {
         return userStorageDb.getAllUsers();
@@ -65,5 +68,9 @@ public class UserService {
             log.info("Не найдено общих друзей.");
         }
         return friendsUser;
+    }
+
+    public List<Film> getRecommendations(int id) {
+        return filmDbStorage.getRecommendations(userStorageDb.getRecommendations(id));
     }
 }
