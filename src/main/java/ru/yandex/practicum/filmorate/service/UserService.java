@@ -77,4 +77,3 @@ public class UserService {
     public String deleteUser(int userId) {
         return userStorageDb.deleteUser(userId);
     }
-}

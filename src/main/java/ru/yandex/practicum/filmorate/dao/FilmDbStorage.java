@@ -169,13 +169,13 @@ public class FilmDbStorage implements FilmStorageDb {
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        String sqlPopular =
-                "SELECT f.*, g.*, m.mpa_name "
-                        + "FROM films f "
-                        + "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id "
-                        + "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id "
-                        + "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id "
-                        + "WHERE  f.film_id IN (SELECT film_id FROM likes where USER_ID > 0 GROUP BY film_id  ORDER BY COUNT(*)  DESC LIMIT ?)";
+        String sqlPopular = "SELECT f.*, g.*, m.mpa_name " +
+                "FROM films f " +
+                "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id " +
+                "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id " +
+                "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id " +
+                "WHERE  f.film_id IN (SELECT film_id FROM likes where USER_ID > 0 GROUP BY film_id  ORDER BY COUNT(*)  DESC LIMIT ?)";
+
         Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, FilmDbStorage::makeFilm, count);
         if (popularFilms.isEmpty()) {
             popularFilms = getAllFilms().stream().filter(film -> film.getRate() != 0).collect(Collectors.toList());
@@ -318,6 +318,13 @@ public class FilmDbStorage implements FilmStorageDb {
     }
 
     public List<Film> getRecommendations(List<Integer> recommendedFilmsIds) {
+        String recommendedFilmsSql = "select * from films join MPA M on M.MPA_ID = FILMS.MPA_ID where film_id IN (?)";
+        List<Film> recommendedFilms = jdbcTemplate.query(recommendedFilmsSql, new Object[]{recommendedFilmsIds},
+                FilmDbStorage::makeFilm);
+        recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
+        return recommendedFilms;
+    }
+}
         String inSql = String.join(",", Collections.nCopies(recommendedFilmsIds.size(), "?"));
         List<Film> recommendedFilms = jdbcTemplate.query(String.format("select * " +
                 "from films " +
@@ -326,7 +333,6 @@ public class FilmDbStorage implements FilmStorageDb {
         recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
         return recommendedFilms;
     }
-
 
     private static class FilmSql {
 
@@ -356,4 +362,3 @@ public class FilmDbStorage implements FilmStorageDb {
                 "DELETE FROM films_directors WHERE film_id = ?";
     }
 }
-
