@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -56,7 +56,7 @@ public class UserDbStorageTest {
                 .description("adipisicing")
                 .releaseDate(LocalDate.of(1967, 3, 25))
                 .duration(100)
-                .mpa(new MPA(1, null))
+                .mpa(new Mpa(1, null))
                 .build();
 
         Film film2 = Film.builder()
@@ -64,7 +64,7 @@ public class UserDbStorageTest {
                 .description("New film about friends")
                 .releaseDate(LocalDate.of(1999, 4, 30))
                 .duration(120)
-                .mpa(new MPA(3, null))
+                .mpa(new Mpa(3, null))
                 .genres(new ArrayList<>(List.of(new Genre(1, null))))
                 .build();
 
@@ -73,7 +73,7 @@ public class UserDbStorageTest {
                 .description("Film with director")
                 .releaseDate(LocalDate.of(1999, 4, 30))
                 .duration(120)
-                .mpa(new MPA(3, null))
+                .mpa(new Mpa(3, null))
                 .genres(new ArrayList<>(List.of(new Genre(1, null))))
                 .build();
 
