@@ -1,10 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import java.util.Collection;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.service.FilmService;
+
 import java.util.Collection;
 
 @Slf4j
@@ -53,6 +58,12 @@ public class FilmController {
     @DeleteMapping(value = "/{id}/like/{userId}")
     private void deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/director/{id}")
+    public List<Film> getFilmsByDirector(
+            @PathVariable("id") Integer directorId, @RequestParam(name = "sortBy") String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 
     @GetMapping(value = "/common")

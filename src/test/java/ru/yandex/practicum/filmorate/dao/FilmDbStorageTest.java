@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -9,7 +10,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -41,7 +42,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -69,10 +70,10 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
-        MPA mpa = filmStorage.checkMpa(filmTest);
+        Mpa mpa = filmStorage.checkMpa(filmTest);
 
         assertEquals(4, mpa.getId());
         assertEquals("R", mpa.getName());
@@ -89,7 +90,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(9, "R")).build();
+                .mpa(new Mpa(9, "R")).build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
 
@@ -109,7 +110,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmService.addFilm(filmTest);
 
@@ -134,7 +135,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
@@ -157,7 +158,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
@@ -183,7 +184,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
@@ -201,6 +202,7 @@ public class FilmDbStorageTest {
 
     @Test
     @DirtiesContext
+    @Order(1)
     void getCommonFilms_withNormalBehavior() {
         User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
         User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
@@ -208,10 +210,10 @@ public class FilmDbStorageTest {
         userService.createUser(user1);
         userService.createUser(user2);
 
-        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(MPA.builder().id(1).name("G").build()).build();
-        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(MPA.builder().id(1).name("G").build()).build();
-        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(MPA.builder().id(1).name("G").build()).build();
-        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(MPA.builder().id(1).name("G").build()).build();
+        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(Mpa.builder().id(1).name("G").build()).build();
 
         filmStorage.addFilm(film1);
         filmStorage.addFilm(film2);
