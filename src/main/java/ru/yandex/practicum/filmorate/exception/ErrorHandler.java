@@ -15,15 +15,16 @@ public class ErrorHandler {
         return Map.of(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, HttpStatus> handleNullPointerException(final NullPointerException e) {
-        return Map.of(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, HttpStatus> handleNotFoundException(NotFoundException ex) {
         return Map.of(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+  @ExceptionHandler
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public Map<String, HttpStatus> handleNullPointerException(final NullPointerException e) {
+    return Map.of(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 }

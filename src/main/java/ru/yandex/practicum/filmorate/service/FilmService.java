@@ -3,16 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.DirectorRepository;
 import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
 
@@ -23,6 +24,7 @@ public class FilmService {
 
     private final FilmStorageDb filmStorageDb;
     private final UserStorageDb userStorageDb;
+    private final DirectorRepository directorRepository;
 
     public Film getFilm(int id) {
         Film film = filmStorageDb.getFilm(id);
@@ -31,35 +33,69 @@ public class FilmService {
         }
         List<Genre> genres = filmStorageDb.getGenres(id);
         film.setGenres(genres);
+
+        collectDirectors(film);
+
         return film;
     }
 
     public Collection<Film> getAllFilms() {
-        return filmStorageDb.getAllFilms();
+        return filmStorageDb.getAllFilms().stream()
+                .peek(this::collectDirectors)
+                .collect(Collectors.toList());
+    }
+
+    private void collectDirectors(Film film) {
+        Collection<Director> directors = filmStorageDb.findDirectorsByFilmId(film.getId());
+        if (!directors.isEmpty()) {
+            film.getDirectors().clear();
+            film.getDirectors().addAll(directors);
+        }
     }
 
     public Film addFilm(Film film) {
         validateFilm(film);
-        MPA mpa = filmStorageDb.checkMpa(film);
+        Mpa mpa = filmStorageDb.checkMpa(film);
         List<Genre> genres = filmStorageDb.checkGenre(film);
         Film film1 = filmStorageDb.addFilm(film);
         film1.setMpa(mpa);
         film1.setGenres(genres);
         filmStorageDb.insertFilmGenres(film1);
-        return film;
+
+        if (!film.getDirectors().isEmpty()) {
+            filmDirectorExecuteProcessing(film, film1);
+        }
+        return film1;
     }
 
-    public Film updateFilm(Film film) {
-        validateFilm(film);
-        getFilm(film.getId());
-        MPA mpa = filmStorageDb.checkMpa(film);
-        List<Genre> genres = filmStorageDb.checkGenre(film);
-        Film film1 = filmStorageDb.updateFilm(film);
-        film1.setMpa(mpa);
-        film1.setGenres(genres);
-        filmStorageDb.deleteFilmGenres(film1);
-        filmStorageDb.insertFilmGenres(film1);
-        return film1;
+    public Film updateFilm(Film enteredFilm) {
+        validateFilm(enteredFilm);
+        getFilm(enteredFilm.getId());
+        Mpa mpa = filmStorageDb.checkMpa(enteredFilm);
+        List<Genre> genres = filmStorageDb.checkGenre(enteredFilm);
+        Film filmForResult = filmStorageDb.updateFilm(enteredFilm);
+        filmForResult.setMpa(mpa);
+        filmForResult.setGenres(genres);
+        filmStorageDb.deleteFilmGenres(filmForResult);
+        filmStorageDb.insertFilmGenres(filmForResult);
+
+        filmDirectorExecuteProcessing(enteredFilm, filmForResult);
+
+        return filmForResult;
+    }
+
+    private void filmDirectorExecuteProcessing(Film film, Film filmForResult) {
+        final Set<Director> collectedDirectors =
+                film.getDirectors().stream()
+                        .map(director -> directorRepository.findById(director.getId()))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toSet());
+
+        filmStorageDb.addDirectorsByFilmId(collectedDirectors, film.getId());
+
+        filmForResult.getDirectors().clear();
+        filmForResult.getDirectors().addAll(collectedDirectors);
     }
 
     public void makeLike(int idFilm, int idUser) {
@@ -80,6 +116,34 @@ public class FilmService {
             throw new NotFoundException("count не может быть отрицательным.");
         }
         return filmStorageDb.getPopularFilms(count);
+    }
+
+    public List<Film> getFilmsByDirector(Integer directorId, String sortBy) {
+
+        directorRepository.findById(directorId).orElseThrow(() -> new NotFoundException("404"));
+
+        if (sortBy.equals("year")) {
+            return filmStorageDb.findByDirectorIdAndSortByRelateDate(directorId)
+                    .stream()
+                    .peek(this::collectDirectors)
+                    .peek(film -> {
+                        List<Genre> genres = filmStorageDb.getGenres(film.getId());
+                        film.setGenres(genres);
+                    })
+                    .collect(Collectors.toList());
+        } else if (sortBy.equals("likes")) {
+            return filmStorageDb.findByDirectorIdAndSortByLikes(directorId)
+                    .stream()
+                    .peek(this::collectDirectors)
+                    .peek(film -> {
+                        List<Genre> genres = filmStorageDb.getGenres(film.getId());
+                        film.setGenres(genres);
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        String message = String.format("Сортировка по типу %s отсутствует", sortBy);
+        throw new IllegalStateException(message);
     }
 
     public Collection<Film> getCommonFilms(int userId, int friendId) {

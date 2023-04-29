@@ -7,11 +7,11 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-public class MPA {
+public class Mpa {
     private Integer id;
     private String name;
 
-    public MPA(Integer id, String name) {
+    public Mpa(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
