@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.Collection;
 
 @Slf4j
@@ -15,12 +15,12 @@ public class MpaService {
 
     private final MpaDbStorage mpaDbStorage;
 
-    public Collection<MPA> getAllMpa() {
+    public Collection<Mpa> getAllMpa() {
         return mpaDbStorage.getAllMpa();
     }
 
-    public MPA getMpaById(int id) {
-        MPA mpa = mpaDbStorage.getMpaById(id);
+    public Mpa getMpaById(int id) {
+        Mpa mpa = mpaDbStorage.getMpaById(id);
         if (mpa == null) {
             throw new NotFoundException("MPA с id=" + id + "не найден");
         }
