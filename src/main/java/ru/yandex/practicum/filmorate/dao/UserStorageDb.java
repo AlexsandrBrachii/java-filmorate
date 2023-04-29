@@ -20,4 +20,6 @@ public interface UserStorageDb {
     void deleteFriend(int idUser, int idFriend);
 
     List<User> getFriends(int idUser);
+
+    List<Integer> getRecommendations(int userId);
 }
