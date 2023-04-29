@@ -318,13 +318,6 @@ public class FilmDbStorage implements FilmStorageDb {
     }
 
     public List<Film> getRecommendations(List<Integer> recommendedFilmsIds) {
-        String recommendedFilmsSql = "select * from films join MPA M on M.MPA_ID = FILMS.MPA_ID where film_id IN (?)";
-        List<Film> recommendedFilms = jdbcTemplate.query(recommendedFilmsSql, new Object[]{recommendedFilmsIds},
-                FilmDbStorage::makeFilm);
-        recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
-        return recommendedFilms;
-    }
-}
         String inSql = String.join(",", Collections.nCopies(recommendedFilmsIds.size(), "?"));
         List<Film> recommendedFilms = jdbcTemplate.query(String.format("select * " +
                 "from films " +
@@ -333,6 +326,7 @@ public class FilmDbStorage implements FilmStorageDb {
         recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
         return recommendedFilms;
     }
+
 
     private static class FilmSql {
 

@@ -237,7 +237,7 @@ public class FilmDbStorageTest {
     @DirtiesContext
     void deleteFilm_withNormalBehavior() {
         Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1,
-                1)).genres(List.of()).rate(0).duration(50).mpa(MPA.builder().id(1).name("G").build()).build();
+                1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
         filmStorage.addFilm(film1);
         List<Film> filmsBeforeDelete = new ArrayList<>(filmStorage.getAllFilms());
         assertEquals(1, filmsBeforeDelete.size());
