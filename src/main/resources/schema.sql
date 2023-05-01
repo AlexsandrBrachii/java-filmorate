@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS films CASCADE;
 DROP TABLE IF EXISTS mpa CASCADE;
 DROP TABLE IF EXISTS films_directors CASCADE;
 DROP TABLE IF EXISTS directors CASCADE;
+DROP TABLE IF EXISTS feed CASCADE;
 
 DROP TABLE IF EXISTS reviews CASCADE;
 
@@ -93,3 +94,13 @@ CREATE TABLE IF NOT EXISTS reviews (
   FOREIGN KEY (user_id) REFERENCES users (user_id),
   FOREIGN KEY (film_id) REFERENCES films (film_id)
 );
+create table if not exists feed
+(
+    event_id   int,
+    event_id   int auto_increment,
+    user_id    int,
+    timestamp  timestamp   not null,
+    timestamp  long        not null,
+    event_type varchar(10) not null,
+    operation  varchar(10) not null,
+    entity_id  int         not null,
