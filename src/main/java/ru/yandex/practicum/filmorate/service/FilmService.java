@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -158,6 +159,14 @@ public class FilmService {
 
     public String deleteFilm(Integer id) {
         return filmStorageDb.deleteFilm(id);
+    }
+
+    public Collection<Film> getSearchFilms(String query, String by) {
+        List<String> searchFields = Arrays.asList(by.split(","));
+
+        return filmStorageDb.getSearchFilms(query, searchFields).stream()
+                .peek(this::collectDirectors)
+                .collect(Collectors.toList());
     }
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
