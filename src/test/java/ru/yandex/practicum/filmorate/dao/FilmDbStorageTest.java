@@ -92,9 +92,7 @@ public class FilmDbStorageTest {
                 .rate(4)
                 .mpa(new Mpa(9, "R")).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.addFilm(filmTest);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
 
         assertEquals("Не найден MPA с id: 9", exception.getMessage());
     }
@@ -140,9 +138,7 @@ public class FilmDbStorageTest {
                 .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.addFilm(filmTest);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
 
         assertEquals("Не найден Genre с id: 9", exception.getMessage());
     }
@@ -235,5 +231,19 @@ public class FilmDbStorageTest {
         Collection<Film> films = filmStorage.getCommonFilms(user1.getId(), user2.getId());
 
         assertEquals(films, List.of(film4, film3));
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteFilm_withNormalBehavior() {
+        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1,
+                1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
+        filmStorage.addFilm(film1);
+        List<Film> filmsBeforeDelete = new ArrayList<>(filmStorage.getAllFilms());
+        assertEquals(1, filmsBeforeDelete.size());
+
+        filmStorage.deleteFilm(1);
+        List<Film> filmsAfterDelete = new ArrayList<>(filmStorage.getAllFilms());
+        assertEquals(0, filmsAfterDelete.size());
     }
 }

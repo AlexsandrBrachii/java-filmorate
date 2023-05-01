@@ -73,4 +73,8 @@ public class UserService {
     public List<Film> getRecommendations(int id) {
         return filmDbStorage.getRecommendations(userStorageDb.getRecommendations(id));
     }
+
+    public String deleteUser(int userId) {
+        return userStorageDb.deleteUser(userId);
+    }
 }

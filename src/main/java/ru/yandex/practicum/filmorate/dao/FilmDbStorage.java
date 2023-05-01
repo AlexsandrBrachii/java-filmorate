@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -138,6 +139,21 @@ public class FilmDbStorage implements FilmStorageDb {
     }
 
     @Override
+    public String deleteFilm(int filmId) {
+        try {
+            String sqlQuery = "DELETE FROM LIKES WHERE FILM_ID =?;" +
+                    "DELETE FROM FILM_GENRES WHERE FILM_ID=?; " +
+                    "DELETE FROM FILMS WHERE FILM_ID =?";
+            jdbcTemplate.update(sqlQuery, filmId, filmId, filmId);
+            log.info("фильм " + filmId + " удален");
+        } catch (DataAccessException e) {
+            log.info("фильм " + filmId + " не удален / не найден");
+            throw new NotFoundException("фильм с id " + filmId + " не найден");
+        }
+        return "фильм с id " + filmId + " удалён";
+    }
+
+    @Override
     public void makeLike(int idFilm, int idUser) {
         String sqlInsertLikes = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sqlInsertLikes, idFilm, idUser);
@@ -153,16 +169,20 @@ public class FilmDbStorage implements FilmStorageDb {
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        String sqlPopular =
-                "SELECT f.*, g.*, m.mpa_name "
-                        + "FROM films f "
-                        + "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id "
-                        + "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id "
-                        + "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id "
-                        + "WHERE f.film_id IN (SELECT film_id FROM likes GROUP BY film_id ORDER BY COUNT(*) DESC LIMIT ?)";
+        String sqlPopular = "SELECT f.*, g.*, m.mpa_name " +
+                "FROM films f " +
+                "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id " +
+                "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id " +
+                "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id " +
+                "WHERE  f.film_id IN (SELECT film_id FROM likes where USER_ID > 0 GROUP BY film_id  ORDER BY COUNT(*)  DESC LIMIT ?)";
+
         Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, FilmDbStorage::makeFilm, count);
         if (popularFilms.isEmpty()) {
-            popularFilms = getAllFilms();
+            popularFilms = getAllFilms().stream().filter(film -> film.getRate() != 0).collect(Collectors.toList());
+
+        }
+        for (Film film : popularFilms) {
+            film.setGenres(getGenres(film.getId()));
         }
         return popularFilms;
     }
@@ -336,4 +356,3 @@ public class FilmDbStorage implements FilmStorageDb {
                 "DELETE FROM films_directors WHERE film_id = ?";
     }
 }
-

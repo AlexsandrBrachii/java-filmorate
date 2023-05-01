@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -110,12 +111,12 @@ public class FilmService {
         filmStorageDb.deleteLike(idFilm, idUser);
     }
 
-    public Collection<Film> getPopularFilms(int count) {
+    public Set<Film> getPopularFilms(int count) {
         if (count < 1) {
             log.info("count не может быть отрицательным.");
             throw new NotFoundException("count не может быть отрицательным.");
         }
-        return filmStorageDb.getPopularFilms(count);
+        return new HashSet<>(filmStorageDb.getPopularFilms(count));
     }
 
     public List<Film> getFilmsByDirector(Integer directorId, String sortBy) {
@@ -148,5 +149,9 @@ public class FilmService {
 
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         return filmStorageDb.getCommonFilms(userId, friendId);
+    }
+
+    public String deleteFilm(Integer id) {
+        return filmStorageDb.deleteFilm(id);
     }
 }

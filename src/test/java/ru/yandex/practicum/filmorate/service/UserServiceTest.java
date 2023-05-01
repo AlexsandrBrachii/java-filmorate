@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -131,9 +132,7 @@ public class UserServiceTest {
                 .name("Alex")
                 .birthday(LocalDate.of(1996, 8, 9)).build();
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            userService.createUser(userTest);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () -> userService.createUser(userTest));
 
         assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", exception.getMessage());
     }
@@ -148,9 +147,7 @@ public class UserServiceTest {
                 .name("Alex")
                 .birthday(LocalDate.of(1996, 8, 9)).build();
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            userService.createUser(userTest);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () -> userService.createUser(userTest));
 
         assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
     }
@@ -199,9 +196,7 @@ public class UserServiceTest {
                 .name("new name")
                 .birthday(LocalDate.of(1996, 8, 9)).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            userService.updateUser(userTest1);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.updateUser(userTest1));
 
         assertEquals("User с id " + userTest1.getId() + " не найден.", exception.getMessage());
     }
@@ -299,5 +294,23 @@ public class UserServiceTest {
         assertEquals(1, commonFriend.size());
         User jack = commonFriend.get(0);
         assertEquals("Jack", jack.getName());
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteUser_withNormalBehavior() {
+        User userTest = User.builder()
+                .id(1)
+                .email("awb@mail.ru")
+                .login("awb")
+                .name("Alex")
+                .birthday(LocalDate.of(1996, 8, 9)).build();
+        userService.createUser(userTest);
+        List<User> usersBeforeDelete = new ArrayList<>(userService.getAllUsers());
+        assertEquals(1, usersBeforeDelete.size());
+
+        userService.deleteUser(1);
+        List<User> usersAfterDelete = new ArrayList<>(userService.getAllUsers());
+        assertEquals(0, usersAfterDelete.size());
     }
 }

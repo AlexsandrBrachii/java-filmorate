@@ -18,6 +18,8 @@ public interface FilmStorageDb {
 
     Film updateFilm(Film film);
 
+    String deleteFilm(int filmId);
+
     void makeLike(int idFilm, int idUser);
 
     void deleteLike(int idFilm, int idUser);
