@@ -19,8 +19,7 @@ public class LikeDbStorage implements LikeStorage {
 
         try {
             jdbcTemplate.update(sql, filmId, userId);
-            log.info("Пользователь с id = {} поставил лайк фильму с id = {}", userId, filmId);
-        }
+            log.info("Пользователь с id = {} поставил лайк фильму с id = {}", userId, filmId);}
         catch (DuplicateKeyException ignored) {
             log.warn("Пользователь с id = {} уже ставил лайк фильму с id = {}", userId, filmId);
         }
