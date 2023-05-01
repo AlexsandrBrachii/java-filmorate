@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.constants.EventOperation;
+import ru.yandex.practicum.filmorate.constants.EventType;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,6 +19,7 @@ import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser
 public class UserService {
 
     private final UserStorageDb userStorageDb;
+    private final EventService eventService;
 
     public Collection<User> getAllUsers() {
         return userStorageDb.getAllUsers();
@@ -45,12 +48,14 @@ public class UserService {
         getUser(idUser);
         getUser(idFriend);
         userStorageDb.addFriend(idUser, idFriend);
+        eventService.createEvent(idUser, EventType.FRIEND, EventOperation.ADD, idFriend);
     }
 
     public void deleteFriend(int idUser, int idFriend) {
         getUser(idUser);
         getUser(idFriend);
         userStorageDb.deleteFriend(idUser, idFriend);
+        eventService.createEvent(idUser, EventType.FRIEND, EventOperation.REMOVE, idFriend);
     }
 
     public List<User> getFriends(int idUser) {

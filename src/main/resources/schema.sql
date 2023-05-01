@@ -56,3 +56,11 @@ CREATE TABLE IF NOT EXISTS friends (
   FOREIGN KEY (friend_id) REFERENCES users (user_id),
   PRIMARY KEY (user_id, friend_id)
 );
+create table if not exists feed
+(
+    event_id   int auto_increment,
+    user_id    int,
+    timestamp  long        not null,
+    event_type varchar(10) not null,
+    operation  varchar(10) not null,
+    entity_id  int         not null,

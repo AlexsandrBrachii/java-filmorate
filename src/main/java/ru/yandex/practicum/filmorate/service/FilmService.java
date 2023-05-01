@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.constants.EventOperation;
+import ru.yandex.practicum.filmorate.constants.EventType;
 import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -23,6 +25,7 @@ public class FilmService {
 
     private final FilmStorageDb filmStorageDb;
     private final UserStorageDb userStorageDb;
+    private final EventService eventService;
 
     public Film getFilm(int id) {
         Film film = filmStorageDb.getFilm(id);
@@ -64,6 +67,7 @@ public class FilmService {
 
     public void makeLike(int idFilm, int idUser) {
         filmStorageDb.makeLike(idFilm, idUser);
+        eventService.createEvent(idUser, EventType.LIKE, EventOperation.ADD, idFilm);
     }
 
     public void deleteLike(int idFilm, int idUser) {
@@ -72,6 +76,7 @@ public class FilmService {
             throw new NotFoundException("User с id " + idUser + " не найден.");
         }
         filmStorageDb.deleteLike(idFilm, idUser);
+        eventService.createEvent(idUser, EventType.LIKE, EventOperation.REMOVE, idFilm);
     }
 
     public Collection<Film> getPopularFilms(int count) {
