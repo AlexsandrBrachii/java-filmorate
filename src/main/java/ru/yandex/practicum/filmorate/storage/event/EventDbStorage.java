@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EventDbStorage implements EventStorage{
+public class EventDbStorage implements EventStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
