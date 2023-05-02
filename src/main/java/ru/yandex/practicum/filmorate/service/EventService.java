@@ -21,8 +21,7 @@ public class EventService {
     public List<Event> getFeed(int userId) {
         if (eventStorage.getFeed(userId) != null) {
             return eventStorage.getFeed(userId);
-        }
-        else {
+        } else {
             throw new NotFoundException("Хрень");
         }
     }
