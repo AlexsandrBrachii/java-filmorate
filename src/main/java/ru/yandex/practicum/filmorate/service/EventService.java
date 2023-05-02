@@ -19,7 +19,7 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if (!eventStorage.getFeed(userId).isEmpty()) {
+        if (eventStorage.getFeed(userId).isEmpty()) {
             return eventStorage.getFeed(userId);
         } else {
             throw new NotFoundException("Хрень");
