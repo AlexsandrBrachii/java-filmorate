@@ -52,7 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("user " + user.getName() + " обновлён.");
         return user;
     }
-    
+
     @Override
     public boolean isExist(int id) {
         return users.get(id) != null;
