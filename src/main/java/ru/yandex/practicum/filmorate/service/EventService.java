@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventService {
     private final EventStorage eventStorage;
-    private final UserStorage userStorage;
+    private final UserDbStorage userDbStorage;
 
     public List<Event> getFeed(int userId) {
         if (userDbStorage.getUser(userId) != null) {
