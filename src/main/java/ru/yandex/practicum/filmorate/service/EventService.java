@@ -22,11 +22,7 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if (userStorage.getUser(userId).getName() != null) {
-            return eventStorage.getFeed(userId);
-        } else {
-            throw new NotFoundException("Такого пользователя не существует");
-        }
+        return eventStorage.getFeed(userId);
     }
 
     public void createEvent(int userId, EventType eventType, EventOperation eventOperation, int entityId) {
