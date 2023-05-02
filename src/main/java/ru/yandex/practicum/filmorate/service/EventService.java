@@ -19,10 +19,11 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if (userStorage.getUser(userId) == null) {
-            throw new NotFoundException("Хрень");
-        } else {
+        if (eventStorage.getFeed(userId) == null) {
             return eventStorage.getFeed(userId);
+        }
+        else {
+            throw new NotFoundException("Хрень");
         }
     }
 
