@@ -19,7 +19,7 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if (eventStorage.getFeed(userId) == null) {
+        if (eventStorage.getFeed(userId) != null) {
             return eventStorage.getFeed(userId);
         }
         else {
