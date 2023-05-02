@@ -19,11 +19,10 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        try {
+            if (!userStorage.isExist(userId)) {
+                throw new NotFoundException(Long.toString(userId));
+            }
             return eventStorage.getFeed(userId);
-        } catch (NotFoundException ex) {
-            return null;
-        }
     }
 
     public void createEvent(int userId, EventType eventType, EventOperation eventOperation, int entityId) {
