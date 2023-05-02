@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.event;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.constants.EventOperation;
-import ru.yandex.practicum.filmorate.constants.EventType;
+import ru.yandex.practicum.filmorate.service.event.EventOperation;
+import ru.yandex.practicum.filmorate.service.event.EventType;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import java.sql.ResultSet;
