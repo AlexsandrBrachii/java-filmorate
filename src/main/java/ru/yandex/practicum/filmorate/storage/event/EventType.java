@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.constants;
+package ru.yandex.practicum.filmorate.storage.event;
 
 public enum EventType {
     LIKE,

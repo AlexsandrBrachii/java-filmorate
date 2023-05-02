@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.constants.EventOperation;
-import ru.yandex.practicum.filmorate.constants.EventType;
+import ru.yandex.practicum.filmorate.storage.event.EventOperation;
+import ru.yandex.practicum.filmorate.storage.event.EventType;
 
 
 @Data
