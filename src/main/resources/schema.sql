@@ -101,6 +101,4 @@ CREATE TABLE IF NOT EXISTS feed (
     event_type VARCHAR(255) NOT NULL,
     operation VARCHAR(255) NOT NULL,
     entity_id INT NOT NULL
-    foreign key (user_id) references users (id) on delete cascade,
-    primary key (event_id)
 );
