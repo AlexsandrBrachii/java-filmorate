@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   FOREIGN KEY (film_id) REFERENCES films (film_id)
 );
 CREATE TABLE IF NOT EXISTS feed (
-    event_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT AUTO_INCREMENT,
     user_id INT NOT NULL,
     timestamp long NOT NULL,
     event_type VARCHAR(255) NOT NULL,
