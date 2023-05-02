@@ -74,7 +74,7 @@ public class UserController {
         return userService.getRecommendations(userId);
     }
 
-    @GetMapping("/{id}/feed")
+    @GetMapping(value = "/{id}/feed")
     public List<Event> getFeed(@PathVariable ("id") Integer id) {
         return eventService.getFeed(id);
     }
