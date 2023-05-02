@@ -16,14 +16,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService {
-    final private EventStorage eventStorage;
-    final private UserStorage userStorage;
+    private final EventStorage eventStorage;
+    private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if (userStorage.getUser(userId)!=null) {
+        if (userStorage.getUser(userId) != null) {
             return eventStorage.getFeed(userId);
-        }
-        else {
+        } else {
             throw new NotFoundException("Такого пользователя не существует");
         }
     }
