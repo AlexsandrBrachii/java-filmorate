@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.constants.EventType;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.time.Instant;
 import java.util.List;
