@@ -28,21 +28,21 @@ public class ReviewService {
         if (review.getIsPositive() == null || review.getContent() == null) {
             throw new ValidationException("Поле isPositive не может быть null");
         }
-        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.ADD, review.getReviewId());
+        eventService.createEvent(review.getReviewId(), EventType.REVIEW, EventOperation.ADD, review.getReviewId());
         return reviewStorageDb.addReview(review);
     }
 
     public Review updateReview(Review review) {
         userService.getUser(review.getUserId());
         filmService.getFilm(review.getFilmId());
-        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.UPDATE, review.getReviewId());
+        eventService.createEvent(review.getReviewId(), EventType.REVIEW, EventOperation.UPDATE, review.getReviewId());
         return reviewStorageDb.updateReview(review);
     }
 
     public void deleteReview(int reviewId) {
         reviewStorageDb.deleteReview(reviewId);
         Review review = reviewStorageDb.getReview(reviewId);
-        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
+        eventService.createEvent(review.getReviewId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
     }
 
     public Review getReview(int reviewId) {
