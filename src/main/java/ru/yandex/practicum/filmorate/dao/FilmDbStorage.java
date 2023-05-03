@@ -319,6 +319,41 @@ public class FilmDbStorage implements FilmStorageDb {
         return films;
     }
 
+    @Override
+    public Collection<Film> getSearchFilms(String query, List<String> by) {
+        StringBuilder sqlWhere = new StringBuilder();
+        if (by.containsAll(List.of("director", "title"))) {
+            sqlWhere.append("AND (EXISTS(SELECT d.name " +
+                    "FROM directors d " +
+                    "JOIN films_directors fd ON fd.director_id = d.id " +
+                    "JOIN films ON films.film_id = fd.film_id " +
+                    "WHERE films.film_id = f.film_id " +
+                    "AND d.name ILIKE '%" + query + "%'" +
+                    ") OR f.name ILIKE '%" + query + "%' ) ");
+        } else {
+            if (by.contains("director")) {
+                sqlWhere.append("AND EXISTS(SELECT d.name " +
+                        "FROM directors d " +
+                        "JOIN films_directors fd ON fd.director_id = d.id " +
+                        "JOIN films ON films.film_id = fd.film_id " +
+                        "WHERE films.film_id = f.film_id " +
+                        "AND d.name ILIKE '%" + query + "%' ) ");
+            }
+            if (by.contains("title")) {
+                sqlWhere.append("AND f.name ILIKE '%" + query + "%' ");
+            }
+        }
+        String sql = "SELECT * FROM FILMS f " +
+                "LEFT JOIN MPA m ON m.mpa_id = f.mpa_id " +
+                "WHERE true " + sqlWhere +
+                "GROUP BY f.FILM_ID " +
+                "ORDER BY f.rate ASC";
+        List<Film> films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
+        films.forEach(film -> film.setGenres(getGenres(film.getId())));
+
+        return films;
+    }
+
     public static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
         Genre genre =
                 Genre.builder().id(rs.getInt("genre_id")).name(rs.getString("genre_name")).build();

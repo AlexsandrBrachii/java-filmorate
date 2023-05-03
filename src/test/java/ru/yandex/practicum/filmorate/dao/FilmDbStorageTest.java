@@ -249,6 +249,24 @@ public class FilmDbStorageTest {
 
     @Test
     @DirtiesContext
+    void getSearchFilms_withNormalBehavior() {
+        Film film1 = Film.builder().name("fil1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(Mpa.builder().id(1).name("G").build()).build();
+        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(Mpa.builder().id(1).name("G").build()).build();
+
+        filmStorage.addFilm(film1);
+        filmStorage.addFilm(film2);
+        filmStorage.addFilm(film3);
+        filmStorage.addFilm(film4);
+
+        Collection<Film> films = filmService.getSearchFilms("film", "title");
+
+        assertEquals(films, List.of(film2, film3, film4));
+    }
+
+    @Test
+    @DirtiesContext
     void getPopularFilms_withNormalBehavior() {
         User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
         User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
