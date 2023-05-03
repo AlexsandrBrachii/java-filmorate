@@ -159,4 +159,8 @@ public class FilmService {
     public String deleteFilm(Integer id) {
         return filmStorageDb.deleteFilm(id);
     }
+
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
+        return filmStorageDb.getPopularFilmsByGenreAndYear(count, genreId, year);
+    }
 }

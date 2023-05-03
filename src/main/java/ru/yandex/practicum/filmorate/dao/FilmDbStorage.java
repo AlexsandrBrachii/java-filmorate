@@ -296,6 +296,29 @@ public class FilmDbStorage implements FilmStorageDb {
         return films;
     }
 
+    @Override
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
+        StringBuilder sqlWhere = new StringBuilder();
+        if (genreId != null) {
+            sqlWhere.append(String.format("AND ARRAY_CONTAINS(g.genres_arr, %d) ", genreId));
+        }
+        if (year != null) {
+            sqlWhere.append(String.format("AND EXTRACT(YEAR FROM f.releasedate) = %d ", year));
+        }
+        String sqlPopularFilms = "SELECT * " +
+                "FROM FILMS f " +
+                "LEFT JOIN (SELECT film_id, ARRAY_AGG(GENRE_ID) AS genres_arr FROM FILM_GENRES GROUP BY film_id) g " +
+                "ON g.film_id = f.film_id " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "WHERE true " + sqlWhere +
+                "ORDER BY f.rate DESC";
+        List<Film> films = jdbcTemplate.query(sqlPopularFilms, FilmDbStorage::makeFilm);
+        for (Film film : films) {
+            film.setGenres(getGenres(film.getId()));
+        }
+        return films;
+    }
+
     public static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
         Genre genre =
                 Genre.builder().id(rs.getInt("genre_id")).name(rs.getString("genre_name")).build();
