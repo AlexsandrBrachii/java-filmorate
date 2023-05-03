@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.EventService;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final EventService eventService;
 
     @GetMapping
     private Collection<User> getAllUsers() {
@@ -55,6 +58,7 @@ public class UserController {
         return userService.deleteUser(userId);
     }
 
+
     @PutMapping(value = "/{id}/friends/{friendId}")
     private void addFriend(@PathVariable int id, @PathVariable int friendId) {
         userService.addFriend(id, friendId);
@@ -69,4 +73,10 @@ public class UserController {
     private List<Film> getRecommendations(@PathVariable int userId) {
         return userService.getRecommendations(userId);
     }
+
+    @GetMapping(value = "/{id}/feed")
+    public List<Event> getFeed(@PathVariable ("id") Integer id) {
+        return eventService.getFeed(id);
+    }
 }
+

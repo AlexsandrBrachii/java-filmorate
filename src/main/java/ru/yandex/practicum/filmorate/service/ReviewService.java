@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.storage.event.EventOperation;
+import ru.yandex.practicum.filmorate.storage.event.EventType;
 import ru.yandex.practicum.filmorate.dao.ReviewStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,23 +20,30 @@ public class ReviewService {
     private final ReviewStorageDb reviewStorageDb;
     private final UserService userService;
     private final FilmService filmService;
+    private final EventService eventService;
 
-    public Review addReview(Review review) {
+     public Review addReview(Review review) {
         userService.getUser(review.getUserId());
         filmService.getFilm(review.getFilmId());
         if (review.getIsPositive() == null || review.getContent() == null) {
             throw new ValidationException("Поле isPositive не может быть null");
         }
-        return reviewStorageDb.addReview(review);
+        Review r = reviewStorageDb.addReview(review);
+        eventService.createEvent(r.getUserId(), EventType.REVIEW, EventOperation.ADD, r.getReviewId());
+        return r;
     }
 
-    public Review updateReview(Review review) {
+   public Review updateReview(Review review) {
         userService.getUser(review.getUserId());
         filmService.getFilm(review.getFilmId());
-        return reviewStorageDb.updateReview(review);
+        Review r = reviewStorageDb.updateReview(review);
+        eventService.createEvent(r.getUserId(), EventType.REVIEW, EventOperation.UPDATE, r.getReviewId());
+        return r;
     }
 
     public void deleteReview(int reviewId) {
+        Review review = reviewStorageDb.getReview(reviewId);
+        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
         reviewStorageDb.deleteReview(reviewId);
     }
 
