@@ -141,10 +141,8 @@ public class FilmDbStorage implements FilmStorageDb {
     @Override
     public String deleteFilm(int filmId) {
         try {
-            String sqlQuery = "DELETE FROM LIKES WHERE FILM_ID =?;" +
-                    "DELETE FROM FILM_GENRES WHERE FILM_ID=?; " +
-                    "DELETE FROM FILMS WHERE FILM_ID =?";
-            jdbcTemplate.update(sqlQuery, filmId, filmId, filmId);
+            String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID =?";
+            jdbcTemplate.update(sqlQuery, filmId);
             log.info("фильм " + filmId + " удален");
         } catch (DataAccessException e) {
             log.info("фильм " + filmId + " не удален / не найден");
@@ -157,7 +155,7 @@ public class FilmDbStorage implements FilmStorageDb {
     public void makeLike(int idFilm, int idUser) {
         String sqlInsertLikes = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sqlInsertLikes, idFilm, idUser);
-        log.info("User с id=" + idUser + " поставил лайк film с id=" + idFilm);
+        log.info("User с id=" + idUser + " поставил лайк film с id = " + idFilm);
     }
 
     @Override
