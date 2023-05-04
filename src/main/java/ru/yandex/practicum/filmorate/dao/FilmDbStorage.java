@@ -37,7 +37,7 @@ public class FilmDbStorage implements FilmStorageDb {
     @Override
     public List<Film> getFilm(List<Integer> id) {
         String inSql = String.join(",", Collections.nCopies(id.size(), "?"));
-            List<Film> films = jdbcTemplate.query(String.format("select * " +
+        List<Film> films = jdbcTemplate.query(String.format("select * " +
                 "from films " +
                 "join MPA M on M.MPA_ID = FILMS.MPA_ID " +
                 "where film_id IN (%s)", inSql), id.toArray(), FilmDbStorage::makeFilm);
