@@ -20,7 +20,7 @@ public class EventService {
 
     public List<Event> getFeed(int userId) {
         if (userDbStorage.getUser(userId) != null) {
-            return eventStorage.getFeed(userId);
+            return eventStorage.getFeedByUserId(userId);
         } else {
             throw new NotFoundException("Хрень");
         }

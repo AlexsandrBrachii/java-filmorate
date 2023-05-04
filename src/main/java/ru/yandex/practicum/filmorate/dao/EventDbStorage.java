@@ -18,7 +18,7 @@ public class EventDbStorage implements EventStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Event> getFeed(int userId) {
+    public List<Event> getFeedByUserId(int userId) {
         final String sql = "SELECT * " +
                 "FROM feed " +
                 "WHERE user_id = ? ";
