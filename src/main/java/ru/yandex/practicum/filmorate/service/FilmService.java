@@ -3,20 +3,15 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.storage.event.EventOperation;
-import ru.yandex.practicum.filmorate.storage.event.EventType;
 import ru.yandex.practicum.filmorate.dao.DirectorRepository;
 import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.event.EventOperation;
+import ru.yandex.practicum.filmorate.storage.event.EventType;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm;
@@ -46,8 +41,8 @@ public class FilmService {
 
     public Collection<Film> getAllFilms() {
         return filmStorageDb.getAllFilms().stream()
-                .peek(this::collectDirectors)
-                .collect(Collectors.toList());
+            .peek(this::collectDirectors)
+            .collect(Collectors.toList());
     }
 
     private void collectDirectors(Film film) {
@@ -91,11 +86,11 @@ public class FilmService {
 
     private void filmDirectorExecuteProcessing(Film film, Film filmForResult) {
         final Set<Director> collectedDirectors =
-                film.getDirectors().stream()
-                        .map(director -> directorRepository.findById(director.getId()))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toSet());
+            film.getDirectors().stream()
+                .map(director -> directorRepository.findById(director.getId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
 
         filmStorageDb.addDirectorsByFilmId(collectedDirectors, film.getId());
 
@@ -129,28 +124,28 @@ public class FilmService {
 
         directorRepository.findById(directorId).orElseThrow(() -> new NotFoundException("404"));
 
-        if (sortBy.equals("year")) {
-            return filmStorageDb.findByDirectorIdAndSortByRelateDate(directorId)
-                    .stream()
-                    .peek(this::collectDirectors)
-                    .peek(film -> {
-                        List<Genre> genres = filmStorageDb.getGenres(film.getId());
-                        film.setGenres(genres);
-                    })
-                    .collect(Collectors.toList());
-        } else if (sortBy.equals("likes")) {
-            return filmStorageDb.findByDirectorIdAndSortByLikes(directorId)
-                    .stream()
-                    .peek(this::collectDirectors)
-                    .peek(film -> {
-                        List<Genre> genres = filmStorageDb.getGenres(film.getId());
-                        film.setGenres(genres);
-                    })
-                    .collect(Collectors.toList());
-        }
+        final List<Film> collectedFilms = filmStorageDb.findByDirectorIdAndSortBy(directorId)
+            .stream()
+            .peek(this::collectDirectors)
+            .peek(film -> {
+                List<Genre> genres = filmStorageDb.getGenres(film.getId());
+                film.setGenres(genres);
+            })
+            .collect(Collectors.toList());
 
-        String message = String.format("Сортировка по типу %s отсутствует", sortBy);
-        throw new IllegalStateException(message);
+        Comparator<Film> comparator = null;
+
+        if (sortBy.equals("year")) {
+            comparator = Comparator.comparing(Film::getReleaseDate);
+        } else if (sortBy.equals("likes")) {
+            comparator = Comparator.comparingInt(Film::getRate).reversed();
+        } else {
+            String message = String.format("Сортировка по типу %s отсутствует", sortBy);
+            throw new IllegalStateException(message);
+        }
+        return collectedFilms.stream().sorted(comparator).collect(Collectors.toList());
+
+
     }
 
     public Collection<Film> getCommonFilms(int userId, int friendId) {
@@ -165,8 +160,8 @@ public class FilmService {
         List<String> searchFields = Arrays.asList(by.split(","));
 
         return filmStorageDb.getSearchFilms(query, searchFields).stream()
-                .peek(this::collectDirectors)
-                .collect(Collectors.toList());
+            .peek(this::collectDirectors)
+            .collect(Collectors.toList());
     }
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
