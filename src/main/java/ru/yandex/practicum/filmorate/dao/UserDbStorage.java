@@ -128,14 +128,9 @@ public class UserDbStorage implements UserStorageDb {
     }
 
     @Override
-    public List<Integer> getRecommendations(int userId) {
+    public List<Integer> getRecommendations(int userId, User targetUser) {
         Map<User, List<Integer>> usersWithLikes = new HashMap<>();
-        User targetUser;
-        try {
-            targetUser = getUser(userId);
-        } catch (RuntimeException e) {
-            throw new NotFoundException("пользователя с таким id не существует");
-        }
+
         String sql = "SELECT u2.*, COUNT(l2.film_id) as likes_intersection " +
                 "FROM likes l1 " +
                 "JOIN likes l2 ON l1.film_id = l2.film_id AND l1.user_id != l2.user_id " +
@@ -144,6 +139,7 @@ public class UserDbStorage implements UserStorageDb {
                 "GROUP BY l1.user_id, l2.user_id, u2.user_id " +
                 "ORDER BY likes_intersection DESC " +
                 "LIMIT 10";
+
         String userLikesSql = "Select film_id from likes where user_id = ?";
         SqlRowSet userLikesRs = jdbcTemplate.queryForRowSet(sql, userId);
         while (userLikesRs.next()) {

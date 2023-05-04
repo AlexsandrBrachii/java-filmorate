@@ -23,5 +23,5 @@ public interface UserStorageDb {
 
     List<User> getFriends(int idUser);
 
-    List<Integer> getRecommendations(int userId);
+    List<Integer> getRecommendations(int userId,User targetUser);
 }

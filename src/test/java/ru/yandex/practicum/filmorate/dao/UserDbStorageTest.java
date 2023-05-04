@@ -84,7 +84,7 @@ public class UserDbStorageTest {
         filmService.makeLike(3, 1);
         filmService.makeLike(3, 2);
         filmService.makeLike(2, 2);
-        Optional<List<Film>> optionalRecommendations = Optional.ofNullable(userService.getRecommendations(1));
+        Optional<List<Film>> optionalRecommendations = Optional.ofNullable(filmService.getRecommendations(1));
         assertThat(optionalRecommendations)
                 .isPresent()
                 .hasValueSatisfying(filmsFromDb -> assertThat(filmsFromDb.get(0).getName().equals("New film")).isTrue());
