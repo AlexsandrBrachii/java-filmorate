@@ -25,9 +25,6 @@ public class ReviewService {
      public Review addReview(Review review) {
         userService.getUser(review.getUserId());
         filmService.getFilm(review.getFilmId());
-        if (review.getIsPositive() == null || review.getContent() == null) {
-            throw new ValidationException("Поле isPositive не может быть null");
-        }
         Review r = reviewStorageDb.addReview(review);
         eventService.createEvent(r.getUserId(), EventType.REVIEW, EventOperation.ADD, r.getReviewId());
         return r;
@@ -55,7 +52,7 @@ public class ReviewService {
         return review;
     }
 
-    public Collection<Review> getAllReviews(Integer filmId, int count) {
+    public Collection<Review> getAllReviews(Integer filmId, Integer count) {
         return reviewStorageDb.getAllReviews(filmId, count);
     }
 

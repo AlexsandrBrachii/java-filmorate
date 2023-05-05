@@ -14,7 +14,7 @@ public interface ReviewStorageDb {
 
     Review getReview(int reviewId);
 
-    Collection<Review> getAllReviews(Integer filmId, int count);
+    Collection<Review> getAllReviews(Integer filmId, Integer count);
 
     void makeLikeReview(int reviewId, int userId);
 

@@ -2,4 +2,14 @@
 
 Template repository for Filmorate project.
 
-![database filmorate](https://github.com/AlexsandrBrachii/java-filmorate/blob/add-database/database_filmorate.png)
+![database filmorate](https://github.com/AlexsandrBrachii/java-filmorate/blob/main/database.png)
+
+Группой были выполнены следующие задачи:
+-Функциональность "Общие фильмы"
+-Функциональность "Поиск"
+-Функциональность "Отзывы"
+-Функциональность "Лента событий"
+-Функциональность "Удаление фильмов и пользователей"
+-Функциональность "Вывод самых популярных фильмов по жанру и годам"
+-Функциональность "Рекомендации"
+-Функциональность "Добавление режиссёров в фильмы"
