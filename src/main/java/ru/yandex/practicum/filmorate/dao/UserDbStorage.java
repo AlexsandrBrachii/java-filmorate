@@ -84,11 +84,8 @@ public class UserDbStorage implements UserStorageDb {
     @Override
     public String deleteUser(int userId) {
         try {
-            String sqlQuery = "DELETE  FROM FRIENDS WHERE USER_ID =? OR FRIEND_ID =?;" +
-                    "DELETE  FROM LIKES WHERE USER_ID =?;" +
-                    "DELETE  FROM USERS WHERE USER_ID =?;";
-
-            jdbcTemplate.update(sqlQuery, userId, userId, userId, userId);
+            String sqlQuery = "DELETE FROM USERS WHERE USER_ID =?";
+            jdbcTemplate.update(sqlQuery, userId);
             log.info("Пользователь " + userId + " удалён.");
         } catch (DataAccessException e) {
             log.debug("Пользователь " + userId + " не удалён/ не найден в Базе.");

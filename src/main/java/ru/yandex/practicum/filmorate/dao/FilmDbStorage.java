@@ -128,10 +128,8 @@ public class FilmDbStorage implements FilmStorageDb {
     @Override
     public String deleteFilm(int filmId) {
         try {
-            String sqlQuery = "DELETE FROM likes WHERE film_id =?;" +
-                "DELETE FROM film_genres WHERE film_id=?; " +
-                "DELETE FROM films WHERE film_id =?";
-            jdbcTemplate.update(sqlQuery, filmId, filmId, filmId);
+            String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID =?";
+            jdbcTemplate.update(sqlQuery, filmId);
             log.info("фильм " + filmId + " удален");
         } catch (DataAccessException e) {
             log.info("фильм " + filmId + " не удален / не найден");
@@ -144,7 +142,7 @@ public class FilmDbStorage implements FilmStorageDb {
     public void makeLike(int idFilm, int idUser) {
         String sqlInsertLikes = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sqlInsertLikes, idFilm, idUser);
-        log.info("User с id=" + idUser + " поставил лайк film с id=" + idFilm);
+        log.info("User с id=" + idUser + " поставил лайк film с id = " + idFilm);
     }
 
     @Override
@@ -205,13 +203,13 @@ public class FilmDbStorage implements FilmStorageDb {
         List<Genre> filmGenres = new ArrayList<>();
         if (film.getGenres() != null) {
             Set<Integer> genreSet =
-                film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+                    film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
             for (Integer id : genreSet) {
                 String sqlGenresId = "SELECT * FROM genres WHERE genre_id = ?";
                 List<Genre> genresById = jdbcTemplate.query(sqlGenresId, FilmDbStorage::makeGenre, id);
                 if (genresById.isEmpty()
-                    || genresById.get(0) == null
-                    || !genresById.get(0).getId().equals(id)) {
+                        || genresById.get(0) == null
+                        || !genresById.get(0).getId().equals(id)) {
                     throw new NotFoundException(String.format("Не найден Genre с id: %s", id));
                 }
                 filmGenres.add(genresById.get(0));
@@ -239,7 +237,7 @@ public class FilmDbStorage implements FilmStorageDb {
     @Override
     public void addDirectorsByFilmId(Collection<Director> directors, Integer filmId) {
         List<Object[]> batchArgs = new ArrayList<>();
-        directors.forEach(director -> batchArgs.add(new Object[] {filmId, director.getId()}));
+        directors.forEach(director -> batchArgs.add(new Object[]{filmId, director.getId()}));
         jdbcTemplate.update(FilmSql.DELETE_FILMS_DIRECTORS_BY_FILM_ID, filmId);
         jdbcTemplate.batchUpdate(FilmSql.INSERT_FILMS_DIRECTORS, batchArgs);
     }
