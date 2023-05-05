@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.storage.event.EventOperation;
 import ru.yandex.practicum.filmorate.storage.event.EventType;
 import ru.yandex.practicum.filmorate.dao.ReviewStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
