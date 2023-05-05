@@ -262,7 +262,7 @@ public class FilmDbStorageTest {
 
         Collection<Film> films = filmService.getSearchFilms("film", "title");
 
-        assertEquals(films, List.of(film2, film3, film4));
+        assertEquals(films, List.of(film4, film2, film3));
     }
 
     @Test

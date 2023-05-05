@@ -158,10 +158,17 @@ public class FilmService {
 
     public Collection<Film> getSearchFilms(String query, String by) {
         List<String> searchFields = Arrays.asList(by.split(","));
+        Collection<Film> result = new HashSet<>();
+        if (searchFields.contains("director")) {
+            result.addAll(filmStorageDb.getSearchFilmsByDirector(query));
+        }
+        if (searchFields.contains("title")) {
+            result.addAll(filmStorageDb.getSearchFilmsByTitle(query));
+        }
 
-        return filmStorageDb.getSearchFilms(query, searchFields).stream()
-            .peek(this::collectDirectors)
-            .collect(Collectors.toList());
+        return result.stream()
+                .peek(this::collectDirectors)
+                .collect(Collectors.toList());
     }
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
