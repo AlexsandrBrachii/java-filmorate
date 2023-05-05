@@ -42,9 +42,7 @@ public interface FilmStorageDb {
 
     Collection<Director> findDirectorsByFilmId(Integer filmId);
 
-    List<Film> findByDirectorIdAndSortByRelateDate(Integer directorId);
-
-    List<Film> findByDirectorIdAndSortByLikes(Integer directorId);
+    List<Film> findByDirectorIdAndSortBy(Integer directorId);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
 

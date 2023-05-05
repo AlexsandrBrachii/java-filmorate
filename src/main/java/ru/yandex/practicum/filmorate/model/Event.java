@@ -13,10 +13,10 @@ import ru.yandex.practicum.filmorate.storage.event.EventType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
-    int eventId;
-    long timestamp;
-    int userId;
-    EventType eventType;
-    EventOperation operation;
-    int entityId;
+    private Integer eventId;
+    private Long timestamp;
+    private Integer userId;
+    private EventType eventType;
+    private EventOperation operation;
+    private Integer entityId;
 }
