@@ -31,7 +31,7 @@ public class ReviewDbStorage implements ReviewStorageDb {
             PreparedStatement ps = connection.prepareStatement(sqlInsertReview, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, review.getContent());
             ps.setBoolean(2, review.getIsPositive());
-            ps.setInt(3, review.getUseful() == null ? 0 : review.getUseful());
+            ps.setInt(3, review.getUseful() == null ? 0 : calculateReviewUseful(keyHolder.getKey().intValue()));
             ps.setInt(4, review.getUserId());
             ps.setInt(5, review.getFilmId());
             return ps;
@@ -78,28 +78,26 @@ public class ReviewDbStorage implements ReviewStorageDb {
     }
 
     @Override
-    public Collection<Review> getAllReviews(Integer filmId, int count) {
-        String sql0;
-        String sql1 = "SELECT review_id, content, is_positive, rating_useful, user_id, film_id FROM reviews";
-        if (filmId != 0) {
-            sql0 = sql1 + " WHERE film_id = ? ORDER BY rating_useful DESC";
-        } else {
-            sql0 = sql1 + " ORDER BY rating_useful DESC";
-        }
-        if (count > 0) {
-            sql0 += " LIMIT ?";
+    public Collection<Review> getAllReviews(Integer filmId, Integer count) {
+        StringBuilder sqlQuery = new StringBuilder("SELECT review_id, content, is_positive, rating_useful, user_id, film_id FROM reviews");
+
+        if (filmId != null) {
+            sqlQuery.append(" WHERE film_id = ?");
         }
 
-        return jdbcTemplate.query(sql0, ps -> {
-            if (filmId != 0) {
-                ps.setInt(1, filmId);
-                if (count > 0) {
-                    ps.setInt(2, count);
-                }
-            } else {
-                if (count > 0) {
-                    ps.setInt(1, count);
-                }
+        sqlQuery.append(" ORDER BY rating_useful DESC");
+
+        if (count != null && count > 0) {
+            sqlQuery.append(" LIMIT ?");
+        }
+
+        return jdbcTemplate.query(sqlQuery.toString(), ps -> {
+            int parameterIndex = 1;
+            if (filmId != null) {
+                ps.setInt(parameterIndex++, filmId);
+            }
+            if (count != null && count > 0) {
+                ps.setInt(parameterIndex, count);
             }
         }, (rs, rowNum) -> {
             Review review = Review.builder()
@@ -117,36 +115,44 @@ public class ReviewDbStorage implements ReviewStorageDb {
 
     @Override
     public void makeLikeReview(int reviewId, int userId) {
+        String sqlInsert = "INSERT INTO review_useful (review_id, rating, user_id) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sqlInsert, reviewId, "like", userId);
         Review review = getReview(reviewId);
-        int rating = review.getUseful();
-        review.setUseful(++rating);
+        int rating = calculateReviewUseful(reviewId);
+        review.setUseful(rating);
         updateUsefulForReview(review);
         log.info("Пользователь с id=" + userId + " поставил лайк отзыву с id=" + reviewId);
     }
 
     @Override
     public void deleteLikeReview(int reviewId, int userId) {
+        String sqlDelete = "DELETE FROM review_useful WHERE user_id = ? AND rating = ?";
+        jdbcTemplate.update(sqlDelete, userId, "like");
         Review review = getReview(reviewId);
-        int rating = review.getUseful();
-        review.setUseful(--rating);
+        int rating = calculateReviewUseful(reviewId);
+        review.setUseful(rating);
         updateUsefulForReview(review);
         log.info("Пользователь с id=" + userId + " удалил лайк отзыву с id=" + reviewId);
     }
 
     @Override
     public void makeDislikeReview(int reviewId, int userId) {
+        String sqlInsert = "INSERT INTO review_useful (review_id, rating, user_id) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sqlInsert, reviewId, "dislike", userId);
         Review review = getReview(reviewId);
-        int rating = review.getUseful();
-        review.setUseful(--rating);
+        int rating = calculateReviewUseful(reviewId);;
+        review.setUseful(rating);
         updateUsefulForReview(review);
         log.info("Пользователь с id=" + userId + " поставил дизлайк отзыву с id=" + reviewId);
     }
 
     @Override
     public void deleteDislikeReview(int reviewId, int userId) {
+        String sqlDelete = "DELETE FROM review_useful WHERE user_id = ? AND rating = ?";
+        jdbcTemplate.update(sqlDelete, userId, "dislike");
         Review review = getReview(reviewId);
-        int rating = review.getUseful();
-        review.setUseful(++rating);
+        int rating = calculateReviewUseful(reviewId);
+        review.setUseful(rating);
         updateUsefulForReview(review);
         log.info("Пользователь с id=" + userId + " удалил дизлайк отзыву с id=" + reviewId);
     }
@@ -157,5 +163,22 @@ public class ReviewDbStorage implements ReviewStorageDb {
                 review.getUseful(),
                 review.getReviewId());
         log.info("Рейтинг для отзыва с id=" + review.getReviewId() + " обновлён");
+    }
+
+    public Integer calculateReviewUseful(int reviewId) {
+        Integer rating;
+        String sql = "SELECT COUNT(*) FROM review_useful WHERE review_id = ? AND rating = ?";
+        Integer likes = jdbcTemplate.queryForObject(sql, new Object[]{reviewId, "like"}, Integer.class);
+        Integer dislikes = jdbcTemplate.queryForObject(sql, new Object[]{reviewId, "dislike"}, Integer.class);
+        if (likes != null & dislikes != null) {
+            rating = likes - dislikes;
+        } else if (likes == null && dislikes != null) {
+            rating = -dislikes;
+        } else if (likes != null && dislikes == null) {
+            rating = likes;
+        } else {
+            rating = 0;
+        }
+        return rating;
     }
 }

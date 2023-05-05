@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.storage.event.EventOperation;
 import ru.yandex.practicum.filmorate.storage.event.EventType;
 import ru.yandex.practicum.filmorate.dao.ReviewStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
@@ -25,9 +24,6 @@ public class ReviewService {
      public Review addReview(Review review) {
         userService.getUser(review.getUserId());
         filmService.getFilm(review.getFilmId());
-        if (review.getIsPositive() == null || review.getContent() == null) {
-            throw new ValidationException("Поле isPositive не может быть null");
-        }
         Review r = reviewStorageDb.addReview(review);
         eventService.createEvent(r.getUserId(), EventType.REVIEW, EventOperation.ADD, r.getReviewId());
         return r;
@@ -55,7 +51,7 @@ public class ReviewService {
         return review;
     }
 
-    public Collection<Review> getAllReviews(Integer filmId, int count) {
+    public Collection<Review> getAllReviews(Integer filmId, Integer count) {
         return reviewStorageDb.getAllReviews(filmId, count);
     }
 

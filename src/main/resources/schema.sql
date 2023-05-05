@@ -8,9 +8,8 @@ DROP TABLE IF EXISTS mpa CASCADE;
 DROP TABLE IF EXISTS films_directors CASCADE;
 DROP TABLE IF EXISTS directors CASCADE;
 DROP TABLE IF EXISTS feed CASCADE;
-
-
 DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS review_useful CASCADE;
 
 CREATE TABLE IF NOT EXISTS directors
 (
@@ -102,4 +101,13 @@ CREATE TABLE IF NOT EXISTS feed (
     event_type VARCHAR(255) NOT NULL,
     operation VARCHAR(255) NOT NULL,
     entity_id INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS review_useful (
+    review_id INTEGER NOT NULL,
+    rating ENUM('like', 'dislike'),
+    user_id INTEGER NOT NULL,
+    UNIQUE(user_id, review_id),
+    FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
 );

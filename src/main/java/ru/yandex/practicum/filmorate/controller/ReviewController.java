@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @Slf4j
@@ -23,12 +24,12 @@ public class ReviewController {
     }
 
     @GetMapping
-    private Collection<Review> getAllReviews(@RequestParam(defaultValue = "0") Integer filmId, @RequestParam(defaultValue = "10") Integer count) {
+    private Collection<Review> getAllReviews(@RequestParam(required = false) Integer filmId, @RequestParam(defaultValue = "10") Integer count) {
         return reviewService.getAllReviews(filmId, count);
     }
 
     @PostMapping
-    private Review addReview(@RequestBody Review review) {
+    private Review addReview(@Valid @RequestBody Review review) {
         return reviewService.addReview(review);
     }
 
