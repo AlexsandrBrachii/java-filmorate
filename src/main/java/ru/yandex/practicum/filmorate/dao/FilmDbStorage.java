@@ -7,7 +7,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.h2.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.dao.h2.mapper.FilmMapper;
@@ -36,26 +35,14 @@ public class FilmDbStorage implements FilmStorageDb {
     private final FilmMapper filmMapper;
 
     @Override
-    public Film getFilm(int id) {
-        String sql =
-            "SELECT f.*, m.* FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE f.film_id = ?";
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, id);
-        Film film = null;
-        if (filmRows.next()) {
-            Mpa mpa =
-                Mpa.builder().id(filmRows.getInt("mpa_id")).name(filmRows.getString("mpa_name")).build();
-            film =
-                Film.builder()
-                    .id(id)
-                    .name(filmRows.getString("name"))
-                    .description(filmRows.getString("description"))
-                    .releaseDate(filmRows.getDate("releaseDate").toLocalDate())
-                    .duration(filmRows.getInt("duration"))
-                    .rate(filmRows.getInt("rate"))
-                    .mpa(mpa)
-                    .build();
-        }
-        return film;
+    public List<Film> getFilm(List<Integer> id) {
+        String inSql = String.join(",", Collections.nCopies(id.size(), "?"));
+        List<Film> films = jdbcTemplate.query(String.format("select * " +
+                "from films " +
+                "join MPA M on M.MPA_ID = FILMS.MPA_ID " +
+                "where film_id IN (%s)", inSql), id.toArray(), FilmDbStorage::makeFilm);
+        films.forEach(film -> film.setGenres(getGenres(film.getId())));
+        return films;
     }
 
     @Override
@@ -370,17 +357,6 @@ public class FilmDbStorage implements FilmStorageDb {
                 .build();
         return film;
     }
-
-    public List<Film> getRecommendations(List<Integer> recommendedFilmsIds) {
-        String inSql = String.join(",", Collections.nCopies(recommendedFilmsIds.size(), "?"));
-        List<Film> recommendedFilms = jdbcTemplate.query(String.format("select * " +
-            "from films " +
-            "join MPA M on M.MPA_ID = FILMS.MPA_ID " +
-            "where film_id IN (%s)", inSql), recommendedFilmsIds.toArray(), FilmDbStorage::makeFilm);
-        recommendedFilms.forEach(film -> film.setGenres(getGenres(film.getId())));
-        return recommendedFilms;
-    }
-
 
     private static class FilmSql {
 

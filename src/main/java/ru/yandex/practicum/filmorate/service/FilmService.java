@@ -27,15 +27,15 @@ public class FilmService {
     private final EventService eventService;
 
     public Film getFilm(int id) {
-        Film film = filmStorageDb.getFilm(id);
-        if (film == null) {
+        Film film;
+        try {
+            film = filmStorageDb.getFilm(List.of(id)).get(0);
+        } catch (IndexOutOfBoundsException e) {
             throw new NotFoundException("film с id=" + id + "не найден");
         }
         List<Genre> genres = filmStorageDb.getGenres(id);
         film.setGenres(genres);
-
         collectDirectors(film);
-
         return film;
     }
 
@@ -166,5 +166,15 @@ public class FilmService {
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
         return filmStorageDb.getPopularFilmsByGenreAndYear(count, genreId, year);
+    }
+
+    public List<Film> getRecommendations(int id) {
+        User targetUser;
+        try {
+            targetUser = userStorageDb.getUser(id);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("пользователя с таким id не существует");
+        }
+        return filmStorageDb.getFilm(userStorageDb.getRecommendations(id,targetUser));
     }
 }

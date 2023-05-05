@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface FilmStorageDb {
 
-    Film getFilm(int id);
+    List<Film> getFilm(List<Integer> id);
 
     Collection<Film> getAllFilms();
 

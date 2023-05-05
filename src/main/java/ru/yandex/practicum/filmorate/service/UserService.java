@@ -3,15 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.storage.event.EventOperation;
-import ru.yandex.practicum.filmorate.storage.event.EventType;
-import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorageDb;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.event.EventOperation;
+import ru.yandex.practicum.filmorate.storage.event.EventType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser;
 
@@ -21,7 +20,6 @@ import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser
 public class UserService {
 
     private final UserStorageDb userStorageDb;
-    private final FilmDbStorage filmDbStorage;
     private final EventService eventService;
 
     public Collection<User> getAllUsers() {
@@ -73,10 +71,6 @@ public class UserService {
             log.info("Не найдено общих друзей.");
         }
         return friendsUser;
-    }
-
-    public List<Film> getRecommendations(int id) {
-        return filmDbStorage.getRecommendations(userStorageDb.getRecommendations(id));
     }
 
     public String deleteUser(int userId) {
