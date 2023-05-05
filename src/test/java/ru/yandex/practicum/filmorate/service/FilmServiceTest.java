@@ -355,7 +355,7 @@ public class FilmServiceTest {
         userService.createUser(userTest);
         filmService.makeLike(filmTest.getId(), userTest.getId());
 
-        Collection<Film> films = filmService.getPopularFilms(1);
+        Collection<Film> films = filmService.getPopularFilms(1, null, null);
 
         assertEquals(1, films.size());
     }
@@ -366,7 +366,7 @@ public class FilmServiceTest {
         int wrongCount = -1;
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.getPopularFilms(wrongCount);
+            filmService.getPopularFilms(wrongCount, null, null);
         });
 
         assertEquals("count не может быть отрицательным.", exception.getMessage());

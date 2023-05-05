@@ -112,10 +112,13 @@ public class FilmService {
         eventService.createEvent(idUser, EventType.LIKE, EventOperation.REMOVE, idFilm);
     }
 
-    public Set<Film> getPopularFilms(int count) {
+    public Collection<Film> getPopularFilms(int count, Integer genreId, Integer year) {
         if (count < 1) {
             log.info("count не может быть отрицательным.");
             throw new NotFoundException("count не может быть отрицательным.");
+        }
+        if (genreId != null || year != null) {
+            return filmStorageDb.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
         return new HashSet<>(filmStorageDb.getPopularFilms(count));
     }

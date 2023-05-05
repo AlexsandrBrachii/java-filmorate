@@ -31,10 +31,7 @@ public class FilmController {
     private Collection<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") int count,
                                              @RequestParam(required = false) Integer genreId,
                                              @RequestParam(required = false) Integer year) {
-        if (genreId != null || year != null) {
-            return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
-        }
-        return filmService.getPopularFilms(count);
+        return filmService.getPopularFilms(count, genreId, year);
     }
 
     @PostMapping
