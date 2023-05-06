@@ -262,12 +262,8 @@ public class FilmDbStorage implements FilmStorageDb {
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         String sqlGetCommonFilms = "SELECT * " +
             "FROM films f " +
-            "JOIN (" +
-            "(SELECT film_id FROM likes WHERE user_id = ?) " +
-            "INTERSECT " +
-            "(SELECT film_id FROM likes WHERE user_id = ?)" +
-            ") q " +
-            "ON q.film_id = f.film_id " +
+            "JOIN likes l1 ON l1.film_id = f.film_id AND l1.user_id = ? " +
+            "JOIN likes l2 ON l2.film_id = f.film_id AND l2.user_id = ? " +
             "LEFT JOIN mpa m ON m.mpa_id = f.mpa_id " +
             "ORDER BY f.rate DESC";
         List<Film> films = jdbcTemplate.query(sqlGetCommonFilms, FilmDbStorage::makeFilm, userId, friendId);
