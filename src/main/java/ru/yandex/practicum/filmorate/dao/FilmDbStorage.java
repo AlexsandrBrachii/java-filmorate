@@ -301,37 +301,26 @@ public class FilmDbStorage implements FilmStorageDb {
     }
 
     @Override
-    public Collection<Film> getSearchFilms(String query, List<String> by) {
-        StringBuilder sqlWhere = new StringBuilder();
-        if (by.containsAll(List.of("director", "title"))) {
-            sqlWhere.append("AND (EXISTS(SELECT d.name " +
+    public Collection<Film> getSearchFilmsByDirector(String query) {
+        String sql = "SELECT DISTINCT f.*, m.mpa_name " +
                 "FROM directors d " +
                 "JOIN films_directors fd ON fd.director_id = d.id " +
-                "JOIN films ON films.film_id = fd.film_id " +
-                "WHERE films.film_id = f.film_id " +
-                "AND d.name ILIKE '%" + query + "%'" +
-                ") OR f.name ILIKE '%" + query + "%' ) ");
-        } else {
-            if (by.contains("director")) {
-                sqlWhere.append("AND EXISTS(SELECT d.name " +
-                    "FROM directors d " +
-                    "JOIN films_directors fd ON fd.director_id = d.id " +
-                    "JOIN films ON films.film_id = fd.film_id " +
-                    "WHERE films.film_id = f.film_id " +
-                    "AND d.name ILIKE '%" + query + "%' ) ");
-            }
-            if (by.contains("title")) {
-                sqlWhere.append("AND f.name ILIKE '%" + query + "%' ");
-            }
-        }
-        String sql = "SELECT * FROM FILMS f " +
-            "LEFT JOIN MPA m ON m.mpa_id = f.mpa_id " +
-            "WHERE true " + sqlWhere +
-            "GROUP BY f.FILM_ID " +
-            "ORDER BY f.rate ASC";
+                "JOIN films f ON f.film_id = fd.film_id " +
+                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "WHERE d.name ILIKE '%" + query + "%'";
         List<Film> films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
         films.forEach(film -> film.setGenres(getGenres(film.getId())));
+        return films;
+    }
 
+    @Override
+    public Collection<Film> getSearchFilmsByTitle(String query) {
+        String sql = "SELECT f.*, m.mpa_name " +
+                "FROM films f " +
+                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "WHERE f.name ILIKE '%" + query + "%'";
+        List<Film> films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
+        films.forEach(film -> film.setGenres(getGenres(film.getId())));
         return films;
     }
 
