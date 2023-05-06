@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.Collection;
 import java.util.List;
 
-public interface FilmStorageDb {
+public interface FilmStorage {
 
     List<Film> getFilm(List<Integer> id);
 

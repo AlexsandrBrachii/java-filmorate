@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.UserStorageDb;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.event.EventOperation;
-import ru.yandex.practicum.filmorate.storage.event.EventType;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ import static ru.yandex.practicum.filmorate.validator.UserValidator.validateUser
 @Service
 public class UserService {
 
-    private final UserStorageDb userStorageDb;
+    private final UserStorage userStorageDb;
     private final EventService eventService;
 
     public Collection<User> getAllUsers() {

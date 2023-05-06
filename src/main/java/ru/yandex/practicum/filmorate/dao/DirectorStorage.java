@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 import ru.yandex.practicum.filmorate.model.Director;
 
-public interface DirectorRepository {
+public interface DirectorStorage {
   Collection<Director> findAll();
 
   Optional<Director> findById(Integer directorId);

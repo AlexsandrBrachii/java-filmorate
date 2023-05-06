@@ -1,12 +1,13 @@
-package ru.yandex.practicum.filmorate.dao.h2;
+package ru.yandex.practicum.filmorate.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dao.DirectorRepository;
+import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.h2.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.exception.DirectorException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -14,17 +15,12 @@ import ru.yandex.practicum.filmorate.model.Director;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
+@RequiredArgsConstructor
 @Repository
-public class DirectorH2Impl implements DirectorRepository {
+public class DirectorStorageImpl implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final DirectorMapper directorMapper;
-
-    public DirectorH2Impl(JdbcTemplate jdbcTemplate, DirectorMapper directorMapper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.directorMapper = directorMapper;
-    }
 
     @Override
     public Collection<Director> findAll() {

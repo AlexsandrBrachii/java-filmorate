@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.event;
+package ru.yandex.practicum.filmorate.dao.event_enum;
 
 
 public enum EventOperation {

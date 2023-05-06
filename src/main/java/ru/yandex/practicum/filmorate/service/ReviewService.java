@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.storage.event.EventOperation;
-import ru.yandex.practicum.filmorate.storage.event.EventType;
-import ru.yandex.practicum.filmorate.dao.ReviewStorageDb;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
+import ru.yandex.practicum.filmorate.dao.ReviewStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 
@@ -16,7 +16,7 @@ import java.util.Collection;
 @Service
 public class ReviewService {
 
-    private final ReviewStorageDb reviewStorageDb;
+    private final ReviewStorage reviewStorageDb;
     private final UserService userService;
     private final FilmService filmService;
     private final EventService eventService;

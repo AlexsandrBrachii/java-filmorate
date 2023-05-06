@@ -1,20 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.DirectorRepository;
+import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
 
+@RequiredArgsConstructor
 @Service
 public class DirectorService {
 
-  private final DirectorRepository directorRepository;
-
-  public DirectorService(DirectorRepository directorRepository) {
-    this.directorRepository = directorRepository;
-  }
+  private final DirectorStorage directorRepository;
 
   public Collection<Director> getAll() {
     return directorRepository.findAll();

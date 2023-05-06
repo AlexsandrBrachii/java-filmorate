@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.impl.GenreStorageImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.Collection;
@@ -13,7 +13,7 @@ import java.util.Collection;
 @Service
 public class GenreService {
 
-    private final GenreDbStorage genreDbStorage;
+    private final GenreStorageImpl genreDbStorage;
 
     public Collection<Genre> getAllGenres() {
         return genreDbStorage.getAllGenres();

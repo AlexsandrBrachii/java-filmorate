@@ -3,13 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.DirectorRepository;
-import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
-import ru.yandex.practicum.filmorate.dao.UserStorageDb;
+import ru.yandex.practicum.filmorate.dao.DirectorStorage;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.storage.event.EventOperation;
-import ru.yandex.practicum.filmorate.storage.event.EventType;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,9 +21,9 @@ import static ru.yandex.practicum.filmorate.validator.FilmValidator.validateFilm
 @Service
 public class FilmService {
 
-    private final FilmStorageDb filmStorageDb;
-    private final UserStorageDb userStorageDb;
-    private final DirectorRepository directorRepository;
+    private final FilmStorage filmStorageDb;
+    private final UserStorage userStorageDb;
+    private final DirectorStorage directorRepository;
     private final EventService eventService;
 
     public Film getFilm(int id) {

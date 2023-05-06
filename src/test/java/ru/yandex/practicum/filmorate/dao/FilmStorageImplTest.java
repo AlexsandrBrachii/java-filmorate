@@ -26,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class FilmDbStorageTest {
+public class FilmStorageImplTest {
 
     private final UserService userService;
     private final FilmService filmService;
-    private final FilmStorageDb filmStorage;
+    private final FilmStorage filmStorage;
 
     @Test
     @DirtiesContext
