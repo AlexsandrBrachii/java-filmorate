@@ -31,10 +31,8 @@ public class FilmService {
         try {
             film = filmStorageDb.getFilm(List.of(id)).get(0);
         } catch (IndexOutOfBoundsException e) {
-            throw new NotFoundException("film с id=" + id + "не найден");
+            throw new NotFoundException("film с id=" + id + " не найден");
         }
-        List<Genre> genres = filmStorageDb.getGenres(id);
-        film.setGenres(genres);
         collectDirectors(film);
         return film;
     }
@@ -130,10 +128,6 @@ public class FilmService {
         final List<Film> collectedFilms = filmStorageDb.findByDirectorIdAndSortBy(directorId)
             .stream()
             .peek(this::collectDirectors)
-            .peek(film -> {
-                List<Genre> genres = filmStorageDb.getGenres(film.getId());
-                film.setGenres(genres);
-            })
             .collect(Collectors.toList());
 
         Comparator<Film> comparator = null;

@@ -10,14 +10,16 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.h2.mapper.DirectorMapper;
-import ru.yandex.practicum.filmorate.dao.h2.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,56 +31,48 @@ public class FilmStorageImpl implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final DirectorMapper directorMapper;
-    private final FilmMapper filmMapper;
 
     @Override
     public List<Film> getFilm(List<Integer> id) {
         String inSql = String.join(",", Collections.nCopies(id.size(), "?"));
-        List<Film> films = jdbcTemplate.query(String.format("SELECT * " +
-                "FROM films " +
-                "JOIN MPA M on M.MPA_ID = FILMS.MPA_ID " +
-                "WHERE film_id IN (%s)", inSql), id.toArray(), FilmStorageImpl::makeFilm);
-        films.forEach(film -> film.setGenres(getGenres(film.getId())));
-        return films;
+        return new ArrayList<>(Objects.requireNonNull(jdbcTemplate.query(String.format("SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM " +
+                "FILMS f " +
+                "LEFT JOIN MPA m ON m.MPA_ID = f.MPA_ID " +
+                "LEFT JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
+                "WHERE f.FILM_ID IN (%s)", inSql), id.toArray(), this::makeFilm)));
     }
 
     @Override
     public Collection<Film> getAllFilms() {
-        String sqlFilms =
-                "SELECT f.*, g.*, m.mpa_name "
-                        + "FROM films f "
-                        + "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id "
-                        + "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id "
-                        + "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id";
 
-        Map<Integer, Film> filmMap = new HashMap<>();
-        jdbcTemplate.query(
-                sqlFilms,
-                rs -> {
-                    int id = rs.getInt("film_id");
-                    Film film = filmMap.get(id);
-                    if (film == null) {
-                        film =
-                                Film.builder()
-                                        .id(id)
-                                        .name(rs.getString("name"))
-                                        .description(rs.getString("description"))
-                                        .releaseDate(rs.getDate("releaseDate").toLocalDate())
-                                        .duration(rs.getInt("duration"))
-                                        .rate(rs.getInt("rate"))
-                                        .mpa(FilmStorageImpl.makeMpa(rs, 0))
-                                        .genres(new ArrayList<>())
-                                        .build();
-                        filmMap.put(id, film);
-                    }
-
-                    Integer genreId = rs.getInt("genre_id");
-                    if (genreId != null && genreId != 0) {
-                        Genre genre = FilmStorageImpl.makeGenre(rs, 0);
-                        film.getGenres().add(genre);
-                    }
-                });
-        return filmMap.values();
+        return jdbcTemplate.query("SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM " +
+                "FILMS f " +
+                "LEFT JOIN MPA m ON m.MPA_ID = f.MPA_ID " +
+                "LEFT JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID", this::makeFilm);
     }
 
     @Override
@@ -151,21 +145,26 @@ public class FilmStorageImpl implements FilmStorage {
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        String sqlPopular = "SELECT f.*, g.*, m.mpa_name " +
+        String sqlPopular = "SELECT f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
                 "FROM films f " +
                 "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id " +
                 "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id " +
                 "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id " +
-                "WHERE  f.film_id IN (SELECT film_id FROM likes WHERE user_id > 0 GROUP BY film_id  ORDER BY COUNT(*)  DESC LIMIT ?)";
+                "LEFT OUTER JOIN LIKES L on f.FILM_ID = L.FILM_ID " +
+                "GROUP BY name, genreId, filmId, description, rate, releaseDate, duration " +
+                "ORDER BY COUNT(L.USER_ID) " +
+                "DESC LIMIT ?";
 
-        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, FilmStorageImpl::makeFilm, count);
-        if (popularFilms.isEmpty()) {
-            popularFilms = getAllFilms().stream().filter(film -> film.getRate() != 0).collect(Collectors.toList());
-
-        }
-        for (Film film : popularFilms) {
-            film.setGenres(getGenres(film.getId()));
-        }
+        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, this::makeFilm, count);
         return popularFilms;
     }
 
@@ -190,9 +189,8 @@ public class FilmStorageImpl implements FilmStorage {
     @Override
     public List<Genre> getGenres(int idFilm) {
         String sqlGenres =
-                "SELECT g.* FROM film_genres fg JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
-        List<Genre> filmGenres = jdbcTemplate.query(sqlGenres, FilmStorageImpl::makeGenre, idFilm);
-        return filmGenres;
+                "SELECT g.GENRE_ID as genreId, g.GENRE_NAME as genreName FROM film_genres fg JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
+        return jdbcTemplate.query(sqlGenres, FilmStorageImpl::makeGenre, idFilm);
     }
 
     @Override
@@ -202,7 +200,7 @@ public class FilmStorageImpl implements FilmStorage {
             Set<Integer> genreSet =
                     film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
             for (Integer id : genreSet) {
-                String sqlGenresId = "SELECT * FROM genres WHERE genre_id = ?";
+                String sqlGenresId = "SELECT GENRE_ID as genreId, GENRE_NAME as genreName FROM genres WHERE genre_id = ?";
                 List<Genre> genresById = jdbcTemplate.query(sqlGenresId, FilmStorageImpl::makeGenre, id);
                 if (genresById.isEmpty()
                         || genresById.get(0) == null
@@ -249,111 +247,171 @@ public class FilmStorageImpl implements FilmStorage {
 
     @Override
     public List<Film> findByDirectorIdAndSortBy(Integer directorId) {
-        String sqlSelect = "SELECT f.*, m.*, COUNT(l.user_id) rate FROM films AS f " +
+        String sqlSelect = "SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration,  " +
+                "m.MPA_ID AS mpaId, m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName, " +
+                "COUNT(l.user_id) rate FROM films AS f " +
                 "INNER JOIN mpa m ON m.mpa_id = f.mpa_id " +
                 "LEFT OUTER JOIN films_directors d ON f.film_id = d.film_id " +
                 "LEFT OUTER JOIN likes l ON f.film_id = l.film_id " +
-                "WHERE director_id = ? " +
+                "LEFT OUTER JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT OUTER JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
+                " WHERE director_id = ?" +
                 "GROUP BY f.film_id";
-        return jdbcTemplate.query(sqlSelect, filmMapper, directorId);
+        return new ArrayList<>(Objects.requireNonNull(jdbcTemplate.query(sqlSelect, this::makeFilm, directorId)));
     }
 
 
     public static Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
-        Mpa mpa = Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build();
-        return mpa;
+        return Mpa.builder()
+                .id(rs.getInt("mpa_id"))
+                .name(rs.getString("mpa_name"))
+                .build();
     }
 
     @Override
     public Collection<Film> getCommonFilms(int userId, int friendId) {
-        String sqlGetCommonFilms = "SELECT * " +
-                "FROM films f " +
+
+        String sqlSelect = "SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration,  " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM films AS f " +
+                "INNER JOIN mpa m ON m.mpa_id = f.mpa_id " +
+                "LEFT OUTER JOIN films_directors d ON f.film_id = d.film_id " +
                 "JOIN likes l1 ON l1.film_id = f.film_id AND l1.user_id = ? " +
                 "JOIN likes l2 ON l2.film_id = f.film_id AND l2.user_id = ? " +
-                "LEFT JOIN mpa m ON m.mpa_id = f.mpa_id " +
+                "LEFT OUTER JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT OUTER JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
                 "ORDER BY f.rate DESC";
-        List<Film> films = jdbcTemplate.query(sqlGetCommonFilms, FilmStorageImpl::makeFilm, userId, friendId);
-        for (Film film : films) {
-            film.setGenres(getGenres(film.getId()));
-        }
-        return films;
+        return jdbcTemplate.query(sqlSelect, this::makeFilm, userId, friendId);
     }
 
     @Override
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
-        String sqlPopularFilms = "SELECT f.*, m.mpa_name " +
-                "FROM FILMS f " +
-                "LEFT JOIN FILM_GENRES g ON g.film_id = f.film_id " +
-                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+        String sql = "SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM " +
+                "FILMS f " +
+                "LEFT JOIN MPA m ON m.MPA_ID = f.MPA_ID " +
+                "LEFT JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
                 "WHERE true " +
-                (genreId != null ? String.format("AND g.genre_id = %d ", genreId) : "") +
-                (year != null ? String.format("AND EXTRACT(YEAR FROM f.releasedate) = %d ", year) : "") +
-                "GROUP BY f.film_id " +
-                "ORDER BY f.rate DESC";
-        List<Film> films = jdbcTemplate.query(sqlPopularFilms, FilmStorageImpl::makeFilm);
-        for (Film film : films) {
-            film.setGenres(getGenres(film.getId()));
-        }
-        return films;
+                (genreId != null ? String.format("AND g.GENRE_ID = %d ", genreId) : "") +
+                (year != null ? String.format("AND EXTRACT(YEAR FROM f.RELEASEDATE) = %d ", year) : "") +
+                "GROUP BY f.FILM_ID " +
+                "ORDER BY f.RATE DESC";
+        return jdbcTemplate.query(sql, this::makeFilm);
     }
 
     @Override
     public Collection<Film> getSearchFilmsByDirector(String query) {
-        String sql = "SELECT DISTINCT f.*, m.mpa_name " +
-                "FROM directors d " +
+        String sql = "SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM " +
+                "directors d " +
                 "JOIN films_directors fd ON fd.director_id = d.id " +
                 "JOIN films f ON f.film_id = fd.film_id " +
-                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
+                "LEFT JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
                 "WHERE d.name ILIKE '%" + query + "%'";
-        List<Film> films = jdbcTemplate.query(sql, FilmStorageImpl::makeFilm);
-        films.forEach(film -> film.setGenres(getGenres(film.getId())));
-        return films;
+
+        return jdbcTemplate.query(sql, this::makeFilm);
     }
 
-    /*@Override
-    public Collection<Film> getSearchFilmsByDirector(String query) {
-        String sql = "SELECT DISTINCT f.*, m.mpa_name, g.* " +
-                "FROM directors d " +
-                "JOIN films_directors fd ON fd.director_id = d.id " +
-                "JOIN films f ON f.film_id = fd.film_id " +
-                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "JOIN film_genres fg ON fg.film_id = f.film_id " +
-                "JOIN genres g ON g.genre_id = fg.genre_id " +
-                "WHERE d.name ILIKE '%" + query + "%'";
-        List<Film> films = jdbcTemplate.query(sql, FilmStorageImpl::makeFilm);
-        return films;
-    }*/
 
     @Override
     public Collection<Film> getSearchFilmsByTitle(String query) {
-        String sql = "SELECT f.*, m.mpa_name " +
-                "FROM films f " +
-                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
+        String sql = "SELECT " +
+                "f.FILM_ID as filmId, " +
+                "f.NAME as name, " +
+                "f.DESCRIPTION as description, " +
+                "f.RATE as rate, " +
+                "f.RELEASEDATE as releaseDate, " +
+                "f.DURATION as duration, " +
+                "m.MPA_ID AS mpaId, " +
+                "m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, " +
+                "g.GENRE_NAME AS genreName " +
+                "FROM " +
+                "FILMS f " +
+                "LEFT JOIN MPA m ON m.MPA_ID = f.MPA_ID " +
+                "LEFT JOIN FILM_GENRES fg ON fg.FILM_ID = f.FILM_ID " +
+                "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
                 "WHERE f.name ILIKE '%" + query + "%'";
-        List<Film> films = jdbcTemplate.query(sql, FilmStorageImpl::makeFilm);
-        films.forEach(film -> film.setGenres(getGenres(film.getId())));
-        return films;
+
+        return jdbcTemplate.query(sql, this::makeFilm);
     }
 
     public static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
-        Genre genre =
-                Genre.builder().id(rs.getInt("genre_id")).name(rs.getString("genre_name")).build();
-        return genre;
+        return Genre.builder()
+                .id(rs.getInt("genreId"))
+                .name(rs.getString("genreName"))
+                .build();
     }
 
-    public static Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
-        Mpa rating = Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build();
-        Film film =
-                Film.builder()
-                        .id(rs.getInt("film_id"))
+    public Collection<Film> makeFilm(ResultSet rs) throws SQLException {
+        Map<Integer, Film> filmsMap = new LinkedHashMap<>();
+        while (rs.next()) {
+            int filmId = rs.getInt("filmId");
+            Film film = filmsMap.get(filmId);
+            if (film == null) {
+                Mpa rating = Mpa.builder()
+                        .id(rs.getInt("mpaId"))
+                        .name(rs.getString("mpaName"))
+                        .build();
+                film = Film.builder()
+                        .id(filmId)
                         .name(rs.getString("name"))
                         .description(rs.getString("description"))
                         .releaseDate(rs.getDate("releaseDate").toLocalDate())
                         .duration(rs.getInt("duration"))
                         .rate(rs.getInt("rate"))
                         .mpa(rating)
+                        .genres(new ArrayList<>())
                         .build();
-
-        return film;
+                filmsMap.put(filmId, film);
+            }
+            String genreName = rs.getString("genreName");
+            if (genreName != null) {
+                Genre genre = Genre.builder()
+                        .id(rs.getInt("genreId"))
+                        .name(genreName)
+                        .build();
+                film.getGenres().add(genre);
+            }
+        }
+        return filmsMap.values();
     }
 }

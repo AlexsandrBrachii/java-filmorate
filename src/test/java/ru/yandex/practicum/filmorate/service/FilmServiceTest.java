@@ -72,7 +72,7 @@ public class FilmServiceTest {
             filmService.getFilm(wrongId);
         });
 
-        assertEquals("film с id=" + wrongId + "не найден", exception.getMessage());
+        assertEquals("film с id=" + wrongId + " не найден", exception.getMessage());
     }
 
     @Test
@@ -268,7 +268,7 @@ public class FilmServiceTest {
             filmService.updateFilm(filmTest1);
         });
 
-        assertEquals("film с id=" + filmTest1.getId() + "не найден", exception.getMessage());
+        assertEquals("film с id=" + filmTest1.getId() + " не найден", exception.getMessage());
     }
 
     @Test

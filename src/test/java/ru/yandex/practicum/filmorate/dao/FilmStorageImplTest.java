@@ -230,7 +230,7 @@ public class FilmStorageImplTest {
 
         Collection<Film> films = filmStorage.getCommonFilms(user1.getId(), user2.getId());
 
-        assertEquals(films, List.of(film4, film3));
+        assertEquals(new ArrayList<>(films), List.of(film4, film3));
     }
 
     @Test
@@ -262,7 +262,7 @@ public class FilmStorageImplTest {
 
         Collection<Film> films = filmService.getSearchFilms("film", "title");
 
-        assertEquals(films, List.of(film4, film2, film3));
+        assertEquals(new ArrayList<>(films), List.of(film4, film2, film3));
     }
 
     @Test
@@ -295,7 +295,7 @@ public class FilmStorageImplTest {
         Collection<Film> films1990 = filmStorage.getPopularFilmsByGenreAndYear(1, null, 1990);
         Collection<Film> filmsgenre2 = filmStorage.getPopularFilmsByGenreAndYear(1, 2, 1996);
 
-        assertEquals(films1990, List.of(film1));
-        assertEquals(filmsgenre2, List.of(film3));
+        assertEquals(new ArrayList<>(films1990), List.of(film1));
+        assertEquals(new ArrayList<>(filmsgenre2), List.of(film3));
     }
 }

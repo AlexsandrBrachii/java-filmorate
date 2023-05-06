@@ -18,13 +18,13 @@ public class GenreStorageImpl {
     private final JdbcTemplate jdbcTemplate;
 
     public Collection<Genre> getAllGenres() {
-        String sqlGetAllGenres = "SELECT * FROM genres";
+        String sqlGetAllGenres = "SELECT GENRE_NAME as genreName, GENRE_ID as genreId FROM genres";
         List<Genre> listGenres = jdbcTemplate.query(sqlGetAllGenres, FilmStorageImpl::makeGenre);
         return listGenres;
     }
 
     public Genre getGenreById(int id) {
-        String sqlGetGenre = "SELECT * FROM genres WHERE genre_id = ?";
+        String sqlGetGenre = "SELECT GENRE_NAME as genreName, GENRE_ID as genreId FROM genres WHERE genre_id = ?";
         List<Genre> genreById = jdbcTemplate.query(sqlGetGenre, FilmStorageImpl::makeGenre, id);
         Genre genre = null;
         if (!genreById.isEmpty()) {
