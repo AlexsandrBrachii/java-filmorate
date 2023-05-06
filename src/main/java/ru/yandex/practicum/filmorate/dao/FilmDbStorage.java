@@ -275,20 +275,15 @@ public class FilmDbStorage implements FilmStorageDb {
 
     @Override
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
-        StringBuilder sqlWhere = new StringBuilder();
-        if (genreId != null) {
-            sqlWhere.append(String.format("AND ARRAY_CONTAINS(g.genres_arr, %d) ", genreId));
-        }
-        if (year != null) {
-            sqlWhere.append(String.format("AND EXTRACT(YEAR FROM f.releasedate) = %d ", year));
-        }
-        String sqlPopularFilms = "SELECT * " +
-            "FROM FILMS f " +
-            "LEFT JOIN (SELECT film_id, ARRAY_AGG(GENRE_ID) AS genres_arr FROM FILM_GENRES GROUP BY film_id) g " +
-            "ON g.film_id = f.film_id " +
-            "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-            "WHERE true " + sqlWhere +
-            "ORDER BY f.rate DESC";
+        String sqlPopularFilms = "SELECT f.*, m.mpa_name " +
+                "FROM FILMS f " +
+                "LEFT JOIN FILM_GENRES g ON g.film_id = f.film_id " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "WHERE true " +
+                (genreId != null ? String.format("AND g.genre_id = %d ", genreId) : "") +
+                (year != null ? String.format("AND EXTRACT(YEAR FROM f.releasedate) = %d ", year) : "") +
+                "GROUP BY f.film_id " +
+                "ORDER BY f.rate DESC";
         List<Film> films = jdbcTemplate.query(sqlPopularFilms, FilmDbStorage::makeFilm);
         for (Film film : films) {
             film.setGenres(getGenres(film.getId()));
