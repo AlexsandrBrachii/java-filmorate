@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @Component
@@ -146,21 +147,26 @@ public class FilmStorageImpl implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilms(int count) {
         String sqlPopular = "SELECT f.FILM_ID as filmId, f.NAME as name, f.DESCRIPTION as description, " +
-                "f.RELEASEDATE as releaseDate, f.DURATION as duration, m.MPA_ID AS mpaId, m.MPA_NAME " +
-                "AS mpaName, g.GENRE_ID as genreId, g.GENRE_NAME AS genreName, COUNT(L.USER_ID) AS rate " +
+                "f.RELEASEDATE as releaseDate, f.DURATION as duration, m.MPA_ID AS mpaId, m.MPA_NAME AS mpaName, " +
+                "g.GENRE_ID as genreId, g.GENRE_NAME AS genreName, COUNT(L.USER_ID) AS rate " +
                 "FROM FILMS f " +
                 "LEFT OUTER JOIN FILM_GENRES fg ON fg.film_id = f.film_id " +
                 "LEFT OUTER JOIN GENRES g ON g.genre_id = fg.genre_id " +
                 "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id " +
                 "LEFT JOIN LIKES L on f.FILM_ID = L.FILM_ID " +
+                "WHERE f.FILM_ID in ( " +
+                "SELECT FILM_ID as filmId FROM LIKES GROUP BY filmId ORDER BY COUNT(USER_ID) DESC LIMIT ? ) " +
                 "GROUP BY filmId, name, description, releaseDate, duration, mpaId, mpaName, genreId, genreName " +
                 "ORDER BY rate DESC";
 
-        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, this::makeFilm);
+        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, this::makeFilm, count);
+
         if (popularFilms != null && popularFilms.isEmpty()) {
-            return getAllFilms();
+            return getFilm(IntStream.rangeClosed(1, count)
+                    .boxed()
+                    .collect(Collectors.toList()));
         }
-        return popularFilms.stream().limit(count).collect(Collectors.toList());
+        return popularFilms;
     }
 
     @Override
