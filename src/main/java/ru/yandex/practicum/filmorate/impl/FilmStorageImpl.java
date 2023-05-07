@@ -145,26 +145,21 @@ public class FilmStorageImpl implements FilmStorage {
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        String sqlPopular = "SELECT f.FILM_ID as filmId, " +
-                "f.NAME as name, " +
-                "f.DESCRIPTION as description, " +
-                "f.RATE as rate, " +
-                "f.RELEASEDATE as releaseDate, " +
-                "f.DURATION as duration, " +
-                "m.MPA_ID AS mpaId, " +
-                "m.MPA_NAME AS mpaName, " +
-                "g.GENRE_ID as genreId, " +
-                "g.GENRE_NAME AS genreName " +
+        String sqlPopular = "SELECT f.*, g.*, m.mpa_name " +
                 "FROM films f " +
                 "LEFT OUTER JOIN film_genres fg ON fg.film_id = f.film_id " +
                 "LEFT OUTER JOIN genres g ON g.genre_id = fg.genre_id " +
                 "LEFT OUTER JOIN mpa m ON m.mpa_id = f.mpa_id " +
-                "LEFT OUTER JOIN LIKES L on f.FILM_ID = L.FILM_ID " +
-                "GROUP BY name, genreId, filmId, description, rate, releaseDate, duration " +
-                "ORDER BY COUNT(L.USER_ID) " +
-                "DESC LIMIT ?";
+                "WHERE  f.film_id IN (SELECT film_id FROM likes WHERE user_id > 0 GROUP BY film_id  ORDER BY COUNT(*)  DESC LIMIT ?)";
 
-        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, this::makeFilm, count);
+        Collection<Film> popularFilms = jdbcTemplate.query(sqlPopular, FilmStorageImpl::makeOneFilm, count);
+        if (popularFilms.isEmpty()) {
+            popularFilms = getAllFilms().stream().filter(film -> film.getRate() != 0).collect(Collectors.toList());
+
+        }
+        for (Film film : popularFilms) {
+            film.setGenres(getGenres(film.getId()));
+        }
         return popularFilms;
     }
 
@@ -404,7 +399,7 @@ public class FilmStorageImpl implements FilmStorage {
                 filmsMap.put(filmId, film);
             }
             String genreName = rs.getString("genreName");
-            if (genreName != null) {
+            if (genreName != null && !genreName.isEmpty()) {
                 Genre genre = Genre.builder()
                         .id(rs.getInt("genreId"))
                         .name(genreName)
@@ -414,4 +409,21 @@ public class FilmStorageImpl implements FilmStorage {
         }
         return filmsMap.values();
     }
+
+    public static Film makeOneFilm(ResultSet rs, int rowNum) throws SQLException {
+        Mpa rating = Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build();
+        Film film =
+                Film.builder()
+                        .id(rs.getInt("film_id"))
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .releaseDate(rs.getDate("releaseDate").toLocalDate())
+                        .duration(rs.getInt("duration"))
+                        .rate(rs.getInt("rate"))
+                        .mpa(rating)
+                        .build();
+
+        return film;
+    }
+
 }
