@@ -56,18 +56,18 @@ public class ReviewService {
     }
 
     public void makeLikeReview(int reviewId, int userId) {
-        reviewStorageDb.makeLikeReview(reviewId, userId);
+        reviewStorageDb.makeLikeOrDislike(reviewId, userId, true);
     }
 
     public void makeDislikeReview(int reviewId, int userId) {
-        reviewStorageDb.makeDislikeReview(reviewId, userId);
+        reviewStorageDb.makeLikeOrDislike(reviewId, userId, false);
     }
 
     public void deleteLikeReview(int reviewId, int userId) {
-        reviewStorageDb.deleteLikeReview(reviewId, userId);
+        reviewStorageDb.deleteLikeOrDislike(reviewId, userId, true);
     }
 
     public void deleteDislikeReview(int reviewId, int userId) {
-        reviewStorageDb.deleteDislikeReview(reviewId, userId);
+        reviewStorageDb.deleteLikeOrDislike(reviewId, userId, false);
     }
 }

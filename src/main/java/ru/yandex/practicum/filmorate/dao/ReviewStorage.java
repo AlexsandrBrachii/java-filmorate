@@ -16,11 +16,8 @@ public interface ReviewStorage {
 
     Collection<Review> getAllReviews(Integer filmId, Integer count);
 
-    void makeLikeReview(int reviewId, int userId);
+    void makeLikeOrDislike(int reviewId, int userId, boolean grade);
 
-    void makeDislikeReview(int reviewId, int userId);
+    void deleteLikeOrDislike(int reviewId, int userId, boolean grade);
 
-    void deleteLikeReview(int reviewId, int userId);
-
-    void deleteDislikeReview(int reviewId, int userId);
 }
