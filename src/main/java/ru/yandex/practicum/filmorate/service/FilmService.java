@@ -8,8 +8,8 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventType;
 
 import java.util.*;
 import java.util.stream.Collectors;

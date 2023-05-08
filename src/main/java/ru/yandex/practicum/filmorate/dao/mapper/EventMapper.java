@@ -1,8 +1,8 @@
-package ru.yandex.practicum.filmorate.dao.h2.mapper;
+package ru.yandex.practicum.filmorate.dao.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventType;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import java.sql.ResultSet;

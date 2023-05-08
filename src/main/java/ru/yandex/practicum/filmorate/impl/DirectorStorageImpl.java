@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.DirectorStorage;
-import ru.yandex.practicum.filmorate.dao.h2.mapper.DirectorMapper;
+import ru.yandex.practicum.filmorate.dao.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.exception.DirectorException;
 import ru.yandex.practicum.filmorate.model.Director;
 
