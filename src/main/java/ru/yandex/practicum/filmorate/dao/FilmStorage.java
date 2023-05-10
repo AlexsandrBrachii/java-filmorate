@@ -38,11 +38,9 @@ public interface FilmStorage {
 
     void deleteFilmGenres(Film film);
 
-    void addDirectorsByFilmId(Collection<Director> directors, Integer filmId);
+    void addDirectorsByFilmId(int filmId, int directorId);
 
     Collection<Director> findDirectorsByFilmId(Integer filmId);
-
-    List<Film> findByDirectorIdAndSortBy(Integer directorId);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
 
@@ -51,4 +49,8 @@ public interface FilmStorage {
     Collection<Film> getSearchFilmsByDirector(String query);
 
     Collection<Film> getSearchFilmsByTitle(String query);
+
+    Collection<Film> findAllFilms();
+
+    void deleteDirectorsByFilmId(Integer filmId);
 }

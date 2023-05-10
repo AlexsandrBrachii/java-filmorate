@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
-import ru.yandex.practicum.filmorate.impl.UserStorageImpl;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventType;
+import ru.yandex.practicum.filmorate.dao.impl.UserStorageImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.dao.EventStorage;

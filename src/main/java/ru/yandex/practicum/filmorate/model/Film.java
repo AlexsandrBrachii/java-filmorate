@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import lombok.Builder;
-import lombok.Data;
 
 @Data
 @Builder
@@ -22,5 +23,5 @@ public class Film {
   private List<Genre> genres;
   @JsonIgnore
   private Set<Integer> likes;
-  private final List<Director> directors = new ArrayList<>();
+  private List<Director> directors = new ArrayList<>();
 }

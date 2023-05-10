@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventOperation;
-import ru.yandex.practicum.filmorate.dao.event_enum.EventType;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventOperation;
+import ru.yandex.practicum.filmorate.dao.eventEnum.EventType;
 
 import java.util.Collection;
 import java.util.List;

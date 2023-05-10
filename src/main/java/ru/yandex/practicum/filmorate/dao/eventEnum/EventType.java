@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao.event_enum;
+package ru.yandex.practicum.filmorate.dao.eventEnum;
 
 public enum EventType {
     LIKE,
