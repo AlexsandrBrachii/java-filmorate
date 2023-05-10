@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.impl;
+package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -12,8 +12,11 @@ import ru.yandex.practicum.filmorate.dao.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.exception.DirectorException;
 import ru.yandex.practicum.filmorate.model.Director;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -84,6 +87,19 @@ public class DirectorStorageImpl implements DirectorStorage {
             String message = String.format("Ошибка удаления директора: %s", directorId);
             throw new DirectorException(message);
         }
+    }
+
+    @Override
+    public List<Director> getDirectorsByFilmId(Integer filmId) {
+        String statement = "SELECT * FROM directors AS d " +
+                "LEFT JOIN films_directors AS fd " +
+                "ON d.id = fd.director_id " +
+                "WHERE fd.film_id = ?";
+        return jdbcTemplate.query(statement, this::makeDirector, filmId);
+    }
+
+    private Director makeDirector(ResultSet rs, int rowNum) throws SQLException {
+        return Director.builder().id(rs.getInt("id")).name(rs.getString("name")).build();
     }
 
     private static class DirectorSql {

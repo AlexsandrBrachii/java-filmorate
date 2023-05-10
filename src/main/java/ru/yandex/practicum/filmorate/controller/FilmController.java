@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.List;
+
 
 @Slf4j
 @RestController
@@ -60,7 +60,7 @@ public class FilmController {
     }
 
     @GetMapping("/director/{id}")
-    public List<Film> getFilmsByDirector(@PathVariable("id") Integer directorId, @RequestParam(name = "sortBy") String sortBy) {
+    public Collection<Film> getFilmsByDirector(@PathVariable("id") Integer directorId, @RequestParam(name = "sortBy") String sortBy) {
         return filmService.getFilmsByDirector(directorId, sortBy);
     }
 
@@ -74,3 +74,4 @@ public class FilmController {
         return filmService.getSearchFilms(query, by);
     }
 }
+

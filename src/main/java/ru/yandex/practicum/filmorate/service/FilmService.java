@@ -33,22 +33,11 @@ public class FilmService {
         } catch (IndexOutOfBoundsException e) {
             throw new NotFoundException("film с id=" + id + " не найден");
         }
-        collectDirectors(film);
         return film;
     }
 
     public Collection<Film> getAllFilms() {
-        return filmStorageDb.getAllFilms().stream()
-            .peek(this::collectDirectors)
-            .collect(Collectors.toList());
-    }
-
-    private void collectDirectors(Film film) {
-        Collection<Director> directors = filmStorageDb.findDirectorsByFilmId(film.getId());
-        if (!directors.isEmpty()) {
-            film.getDirectors().clear();
-            film.getDirectors().addAll(directors);
-        }
+        return filmStorageDb.findAllFilms();
     }
 
     public Film addFilm(Film film) {
@@ -60,9 +49,14 @@ public class FilmService {
         film1.setGenres(genres);
         filmStorageDb.insertFilmGenres(film1);
 
-        if (!film.getDirectors().isEmpty()) {
-            filmDirectorExecuteProcessing(film, film1);
+        if (film.getDirectors() != null) {
+            Collection<Director> directors = film.getDirectors();
+            for (Director director : directors) {
+                int idDir = director.getId();
+                filmStorageDb.addDirectorsByFilmId(film.getId(), idDir);
+            }
         }
+
         return film1;
     }
 
@@ -77,23 +71,62 @@ public class FilmService {
         filmStorageDb.deleteFilmGenres(filmForResult);
         filmStorageDb.insertFilmGenres(filmForResult);
 
-        filmDirectorExecuteProcessing(enteredFilm, filmForResult);
-
+        filmStorageDb.deleteDirectorsByFilmId(enteredFilm.getId());
+        if (enteredFilm.getDirectors() != null) {
+            Collection<Director> directors = enteredFilm.getDirectors();
+            for (Director director : directors) {
+                int idDir = director.getId();
+                filmStorageDb.addDirectorsByFilmId(enteredFilm.getId(), idDir);
+            }
+        }
         return filmForResult;
     }
 
-    private void filmDirectorExecuteProcessing(Film film, Film filmForResult) {
-        final Set<Director> collectedDirectors =
-            film.getDirectors().stream()
-                .map(director -> directorRepository.findById(director.getId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+    public Collection<Film> getFilmsByDirector(Integer directorId, String sortBy) {
+        Director director = directorRepository.findById(directorId).orElseThrow(() -> new NotFoundException("404"));
 
-        filmStorageDb.addDirectorsByFilmId(collectedDirectors, film.getId());
+        List<Film> films = new ArrayList<>(filmStorageDb.findAllFilms());
 
-        filmForResult.getDirectors().clear();
-        filmForResult.getDirectors().addAll(collectedDirectors);
+        Comparator<Film> comparator = null;
+        if (sortBy.equals("year")) {
+            comparator = Comparator.comparing(Film::getReleaseDate);
+        } else if (sortBy.equals("likes")) {
+            comparator = Comparator.comparingInt(Film::getRate).reversed();
+        } else {
+            String message = String.format("Сортировка по типу %s отсутствует", sortBy);
+            throw new IllegalStateException(message);
+        }
+
+        return films.stream()
+            .sorted(comparator)
+            .filter(film -> !film.getDirectors().isEmpty())
+            .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getSearchFilms(String query, String by) {
+        List<String> searchFields = Arrays.asList(by.split(","));
+
+        List<Film> films = new ArrayList<>(this.getAllFilms());
+        List<Film> result = new ArrayList<>();
+
+        final boolean isDirectorProvided = (searchFields.contains("director"));
+        final boolean isTitleProvided = searchFields.contains("title");
+
+        for (Film film : films) {
+            boolean isFilmAdded = false;
+
+            if (isTitleProvided && film.getName().toLowerCase().contains(query.toLowerCase())) {
+                result.add(film);
+                isFilmAdded = true;
+            }
+
+            if (isDirectorProvided && !isFilmAdded && film.getDirectors().stream()
+                .anyMatch(director -> director.getName().toLowerCase().contains(query.toLowerCase()))) {
+                result.add(film);
+            }
+        }
+        result.sort(Comparator.comparing(Film::getId).reversed());
+        return result;
     }
 
     public void makeLike(int idFilm, int idUser) {
@@ -121,51 +154,12 @@ public class FilmService {
         return new HashSet<>(filmStorageDb.getPopularFilms(count));
     }
 
-    public List<Film> getFilmsByDirector(Integer directorId, String sortBy) {
-
-        directorRepository.findById(directorId).orElseThrow(() -> new NotFoundException("404"));
-
-        final List<Film> collectedFilms = filmStorageDb.findByDirectorIdAndSortBy(directorId)
-            .stream()
-            .peek(this::collectDirectors)
-            .collect(Collectors.toList());
-
-        Comparator<Film> comparator = null;
-
-        if (sortBy.equals("year")) {
-            comparator = Comparator.comparing(Film::getReleaseDate);
-        } else if (sortBy.equals("likes")) {
-            comparator = Comparator.comparingInt(Film::getRate).reversed();
-        } else {
-            String message = String.format("Сортировка по типу %s отсутствует", sortBy);
-            throw new IllegalStateException(message);
-        }
-        return collectedFilms.stream().sorted(comparator).collect(Collectors.toList());
-
-
-    }
-
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         return filmStorageDb.getCommonFilms(userId, friendId);
     }
 
     public String deleteFilm(Integer id) {
         return filmStorageDb.deleteFilm(id);
-    }
-
-    public Collection<Film> getSearchFilms(String query, String by) {
-        List<String> searchFields = Arrays.asList(by.split(","));
-        Collection<Film> result = new HashSet<>();
-        if (searchFields.contains("director")) {
-            result.addAll(filmStorageDb.getSearchFilmsByDirector(query));
-        }
-        if (searchFields.contains("title")) {
-            result.addAll(filmStorageDb.getSearchFilmsByTitle(query));
-        }
-
-        return result.stream()
-                .peek(this::collectDirectors)
-                .collect(Collectors.toList());
     }
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, Integer genreId, Integer year) {
@@ -179,6 +173,6 @@ public class FilmService {
         } catch (RuntimeException e) {
             throw new NotFoundException("пользователя с таким id не существует");
         }
-        return filmStorageDb.getFilm(userStorageDb.getRecommendations(id,targetUser));
+        return filmStorageDb.getFilm(userStorageDb.getRecommendations(id, targetUser));
     }
 }
