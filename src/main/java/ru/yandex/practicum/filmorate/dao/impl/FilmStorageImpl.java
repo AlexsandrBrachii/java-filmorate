@@ -247,10 +247,20 @@ public class FilmStorageImpl implements FilmStorage {
     }
 
     @Override
+    public void addDirectorsByFilmId(Collection<Director> directors, Integer filmId) {
+
+    }
+
+    @Override
     public Collection<Director> findDirectorsByFilmId(Integer filmId) {
         String sqlSelect =
             "SELECT d.* FROM films_directors fd JOIN directors d ON fd.director_id = d.id WHERE fd.film_id = ?";
         return jdbcTemplate.query(sqlSelect, directorMapper, filmId);
+    }
+
+    @Override
+    public List<Film> findByDirectorIdAndSortBy(Integer directorId) {
+        return null;
     }
 
 

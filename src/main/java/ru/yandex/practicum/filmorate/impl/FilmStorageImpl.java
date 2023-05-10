@@ -231,6 +231,11 @@ public class FilmStorageImpl implements FilmStorage {
     }
 
     @Override
+    public void addDirectorsByFilmId(int filmId, int directorId) {
+
+    }
+
+    @Override
     public void addDirectorsByFilmId(Collection<Director> directors, Integer filmId) {
         String sqlInsert = "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)";
         String sqlDelete = "DELETE FROM films_directors WHERE film_id = ?";
@@ -373,6 +378,16 @@ public class FilmStorageImpl implements FilmStorage {
                 "WHERE f.name ILIKE '%" + query + "%'";
 
         return jdbcTemplate.query(sql, this::makeFilm);
+    }
+
+    @Override
+    public Collection<Film> findAllFilms() {
+        return null;
+    }
+
+    @Override
+    public void deleteDirectorsByFilmId(Integer filmId) {
+
     }
 
     public static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {

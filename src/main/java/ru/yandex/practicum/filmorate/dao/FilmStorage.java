@@ -40,7 +40,11 @@ public interface FilmStorage {
 
     void addDirectorsByFilmId(int filmId, int directorId);
 
+    void addDirectorsByFilmId(Collection<Director> directors, Integer filmId);
+
     Collection<Director> findDirectorsByFilmId(Integer filmId);
+
+    List<Film> findByDirectorIdAndSortBy(Integer directorId);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
 
