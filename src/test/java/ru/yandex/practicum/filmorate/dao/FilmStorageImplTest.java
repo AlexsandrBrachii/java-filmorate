@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,7 +16,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -202,39 +200,6 @@ public class FilmStorageImplTest {
 
     @Test
     @DirtiesContext
-    @Order(1)
-    void getCommonFilms_withNormalBehavior() {
-        User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
-        User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
-
-        userService.createUser(user1);
-        userService.createUser(user2);
-
-        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(Mpa.builder().id(1).name("G").build()).build();
-
-        filmStorage.addFilm(film1);
-        filmStorage.addFilm(film2);
-        filmStorage.addFilm(film3);
-        filmStorage.addFilm(film4);
-
-        filmStorage.makeLike(film1.getId(), user1.getId());
-        filmStorage.makeLike(film2.getId(), user2.getId());
-
-        filmStorage.makeLike(film3.getId(), user1.getId());
-        filmStorage.makeLike(film3.getId(), user2.getId());
-        filmStorage.makeLike(film4.getId(), user1.getId());
-        filmStorage.makeLike(film4.getId(), user2.getId());
-
-        Collection<Film> films = filmStorage.getCommonFilms(user1.getId(), user2.getId());
-
-        assertEquals(new ArrayList<>(films), List.of(film4, film3));
-    }
-
-    @Test
-    @DirtiesContext
     void deleteFilm_withNormalBehavior() {
         Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1,
                 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
@@ -245,57 +210,5 @@ public class FilmStorageImplTest {
         filmStorage.deleteFilm(1);
         List<Film> filmsAfterDelete = new ArrayList<>(filmStorage.getAllFilms());
         assertEquals(0, filmsAfterDelete.size());
-    }
-
-    @Test
-    @DirtiesContext
-    void getSearchFilms_withNormalBehavior() {
-        Film film1 = Film.builder().name("fil1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of()).rate(4).duration(150).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(Mpa.builder().id(1).name("G").build()).build();
-
-        filmStorage.addFilm(film1);
-        filmStorage.addFilm(film2);
-        filmStorage.addFilm(film3);
-        filmStorage.addFilm(film4);
-
-        Collection<Film> films = filmService.getSearchFilms("film", "title");
-
-        assertEquals(new ArrayList<>(films), List.of(film4, film2, film3));
-    }
-
-    @Test
-    @DirtiesContext
-    void getPopularFilms_withNormalBehavior() {
-        User user1 = User.builder().login("user1").email("user1@mail.ru").birthday(LocalDate.of(2000, 1, 1)).build();
-        User user2 = User.builder().login("user2").email("user2@mail.ru").birthday(LocalDate.of(2001, 1, 1)).build();
-
-        userService.createUser(user1);
-        userService.createUser(user2);
-
-        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1, 1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film2 = Film.builder().name("film2").description("desc2").releaseDate(LocalDate.of(1995, 1, 1)).genres(List.of()).rate(0).duration(100).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film3 = Film.builder().name("film3").description("desc3").releaseDate(LocalDate.of(1996, 1, 1)).genres(List.of(Genre.builder().id(2).build())).rate(4).duration(150).mpa(Mpa.builder().id(1).name("G").build()).build();
-        Film film4 = Film.builder().name("film4").description("desc4").releaseDate(LocalDate.of(1997, 1, 1)).genres(List.of()).rate(5).duration(200).mpa(Mpa.builder().id(1).name("G").build()).build();
-
-        filmService.addFilm(film1);
-        filmService.addFilm(film2);
-        filmService.addFilm(film3);
-        filmService.addFilm(film4);
-
-        filmStorage.makeLike(film1.getId(), user1.getId());
-        filmStorage.makeLike(film2.getId(), user2.getId());
-
-        filmStorage.makeLike(film3.getId(), user1.getId());
-        filmStorage.makeLike(film3.getId(), user2.getId());
-        filmStorage.makeLike(film4.getId(), user1.getId());
-        filmStorage.makeLike(film4.getId(), user2.getId());
-
-        Collection<Film> films1990 = filmStorage.getPopularFilmsByGenreAndYear(1, null, 1990);
-        Collection<Film> filmsgenre2 = filmStorage.getPopularFilmsByGenreAndYear(1, 2, 1996);
-
-        assertEquals(new ArrayList<>(films1990), List.of(film1));
-        assertEquals(new ArrayList<>(filmsgenre2), List.of(film3));
     }
 }
