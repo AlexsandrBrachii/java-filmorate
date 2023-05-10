@@ -103,6 +103,7 @@ public class FilmService {
             .collect(Collectors.toList());
     }
 
+
     public Collection<Film> getSearchFilms(String query, String by) {
         List<String> searchFields = Arrays.asList(by.split(","));
 
@@ -133,6 +134,7 @@ public class FilmService {
         filmStorageDb.makeLike(idFilm, idUser);
         eventService.createEvent(idUser, EventType.LIKE, EventOperation.ADD, idFilm);
     }
+
 
     public void deleteLike(int idFilm, int idUser) {
         User user = userStorageDb.getUser(idUser);
