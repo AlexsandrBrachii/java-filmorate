@@ -1,4 +1,15 @@
-# java-filmorate
+# java-filmorate!
+
 Template repository for Filmorate project.
 
-![database filmorate](https://github.com/AlexsandrBrachii/java-filmorate/blob/add-database/database_filmorate.png)
+![database filmorate](https://github.com/AlexsandrBrachii/java-filmorate/blob/main/database.png)
+
+Группой были выполнены следующие задачи:
+-Функциональность "Общие фильмы"                                    \ Виноградов Михаил
+-Функциональность "Поиск"                                           \ Виноградов Михаил
+-Функциональность "Отзывы"                                          \ Брачий Александр
+-Функциональность "Лента событий"                                   \ Хальчицкая Маргарита
+-Функциональность "Удаление фильмов и пользователей"                \ Ржеутский Вячеслав
+-Функциональность "Вывод самых популярных фильмов по жанру и годам" \ Виноградов Михаил
+-Функциональность "Рекомендации"                                    \ Ржеутский Вячеслав
+-Функциональность "Добавление режиссёров в фильмы"                  \ Дядюшкина Анна

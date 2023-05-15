@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.dao.FilmStorageDb;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ public class FilmServiceTest {
 
     private final UserService userService;
     private final FilmService filmService;
-    private final FilmStorageDb filmStorage;
+    private final FilmStorage filmStorage;
 
     @Test
     @DirtiesContext
@@ -39,7 +39,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         Optional<Film> filmOptional = Optional.ofNullable(filmService.getFilm(filmTest.getId()));
@@ -64,7 +64,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
         int wrongId = 2;
 
@@ -72,7 +72,7 @@ public class FilmServiceTest {
             filmService.getFilm(wrongId);
         });
 
-        assertEquals("film с id=" + wrongId + "не найден", exception.getMessage());
+        assertEquals("film с id=" + wrongId + " не найден", exception.getMessage());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         Film filmTest1 = Film.builder()
@@ -95,7 +95,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest1);
 
         Collection<Film> films = filmService.getAllFilms();
@@ -113,7 +113,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         Optional<Film> filmOptional = Optional.ofNullable(filmService.getFilm(filmTest.getId()));
@@ -138,7 +138,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             filmService.addFilm(filmTest);
@@ -161,7 +161,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             filmService.addFilm(filmTest);
@@ -180,7 +180,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(1894, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             filmService.addFilm(filmTest);
@@ -199,7 +199,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(-1)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             filmService.addFilm(filmTest);
@@ -218,7 +218,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         Film filmTest1 = Film.builder()
@@ -228,7 +228,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2011, 1, 1))
                 .duration(80)
                 .rate(3)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.updateFilm(filmTest1);
 
         Optional<Film> filmOptional = Optional.ofNullable(filmService.getFilm(filmTest.getId()));
@@ -252,7 +252,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         Film filmTest1 = Film.builder()
@@ -262,13 +262,13 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
             filmService.updateFilm(filmTest1);
         });
 
-        assertEquals("film с id=" + filmTest1.getId() + "не найден", exception.getMessage());
+        assertEquals("film с id=" + filmTest1.getId() + " не найден", exception.getMessage());
     }
 
     @Test
@@ -281,7 +281,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -309,7 +309,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -343,7 +343,7 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -355,7 +355,7 @@ public class FilmServiceTest {
         userService.createUser(userTest);
         filmService.makeLike(filmTest.getId(), userTest.getId());
 
-        Collection<Film> films = filmService.getPopularFilms(1);
+        Collection<Film> films = filmService.getPopularFilms(1, null, null);
 
         assertEquals(1, films.size());
     }
@@ -366,7 +366,7 @@ public class FilmServiceTest {
         int wrongCount = -1;
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.getPopularFilms(wrongCount);
+            filmService.getPopularFilms(wrongCount, null, null);
         });
 
         assertEquals("count не может быть отрицательным.", exception.getMessage());

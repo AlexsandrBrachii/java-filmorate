@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class FilmDbStorageTest {
+public class FilmStorageImplTest {
 
     private final UserService userService;
     private final FilmService filmService;
-    private final FilmStorageDb filmStorage;
+    private final FilmStorage filmStorage;
 
     @Test
     @DirtiesContext
@@ -40,7 +40,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
         User userTest = User.builder()
@@ -68,10 +68,10 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R")).build();
+                .mpa(new Mpa(4, "R")).build();
         filmService.addFilm(filmTest);
 
-        MPA mpa = filmStorage.checkMpa(filmTest);
+        Mpa mpa = filmStorage.checkMpa(filmTest);
 
         assertEquals(4, mpa.getId());
         assertEquals("R", mpa.getName());
@@ -88,11 +88,9 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(9, "R")).build();
+                .mpa(new Mpa(9, "R")).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.addFilm(filmTest);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
 
         assertEquals("Не найден MPA с id: 9", exception.getMessage());
     }
@@ -110,7 +108,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmService.addFilm(filmTest);
 
@@ -135,12 +133,10 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            filmService.addFilm(filmTest);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> filmService.addFilm(filmTest));
 
         assertEquals("Не найден Genre с id: 9", exception.getMessage());
     }
@@ -160,7 +156,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
@@ -186,7 +182,7 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2012, 1, 1))
                 .duration(90)
                 .rate(4)
-                .mpa(new MPA(4, "R"))
+                .mpa(new Mpa(4, "R"))
                 .genres(genres).build();
         filmStorage.addFilm(filmTest);
         filmTest.setGenres(genres);
@@ -200,5 +196,19 @@ public class FilmDbStorageTest {
         List<Genre> genreList1 = filmStorage.getGenres(filmTest.getId());
 
         assertEquals(0, genreList1.size());
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteFilm_withNormalBehavior() {
+        Film film1 = Film.builder().name("film1").description("desc1").releaseDate(LocalDate.of(1990, 1,
+                1)).genres(List.of()).rate(0).duration(50).mpa(Mpa.builder().id(1).name("G").build()).build();
+        filmStorage.addFilm(film1);
+        List<Film> filmsBeforeDelete = new ArrayList<>(filmStorage.getAllFilms());
+        assertEquals(1, filmsBeforeDelete.size());
+
+        filmStorage.deleteFilm(1);
+        List<Film> filmsAfterDelete = new ArrayList<>(filmStorage.getAllFilms());
+        assertEquals(0, filmsAfterDelete.size());
     }
 }
